@@ -2,9 +2,9 @@
     <div>
         <p>Selecione o nome que deseja cancelar:
         <select v-model="selectedName">
-            <option v-for="reserve of filteredNames">{{ reserve.nome }}</option>
+            <option v-for="reserve of filteredNames">{{ reserve.name }}</option>
         </select>
-        <button class="btnCancelar" @click="cancel">Confirmar</button>
+        <b-button class="btnCancelar" @click="cancel">Confirmar</b-button>
       </p>
     </div>
 </template>
