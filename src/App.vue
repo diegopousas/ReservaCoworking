@@ -6,9 +6,10 @@
           <p>Qual a data que deseja agendar ? <input type="date" class="inpDate" v-model="date" @blur="haveVacancy"></p>
           <p>Informe seu nome: <input type="text" class="inpName" v-model="name" @keydown.enter="reserve"></p>
           <p>
-            <b-button class="mr-2" variant="success" size="sm" @click="reserve">Salvar</b-button> 
+            <b-button id="reserveButton" class="mr-2" variant="success" size="sm" @click="reserve">Salvar</b-button> 
             <b-button class="mr-2" variant="danger" size="sm" v-show="reserves.length" @click="cancelTab">Cancelar Reserva</b-button>
             <b-button variant="info" size="sm" disabled style="text-decoration: line-through;">Dias Disponíveis</b-button>
+            <!-- <b-button class="ml-2" size="sm" @click="mostrarModal">Mostrar Modal</b-button> -->
           </p>
         </div>
         <div class="cancellationTab" v-else>
@@ -18,35 +19,41 @@
                 <option v-for="reserve in reserves" :value="reserve.date">{{ formatDate(reserve.date) }}</option>
               </select>
             </p>
-            <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut" mode="out-in">
+          <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut" mode="out-in">
               <List v-if = "selectedDate" 
               :filtered-names = "filteredNames"
               @canceled="cancel($event)"
               @goHome="reserveTab = true"/>
-            </transition>
+          </transition>
           </div>
         </transition>
         <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
           <b-alert v-if="message.status" show :variant="message.type" :size="message.size">{{ message.text }}</b-alert>
         </transition>
+        <b-modal ref="my-modal" hide-footer title="Using Component Methods">
+          <div class="modalCancell">
+            <b-button class="mr-1">Sim</b-button>
+            <b-button>Não</b-button>
+          </div>
+        </b-modal>
   </div>
 </template>
 <script>
 import List from './components/List.vue'
+import People from './components/People'
 export default {
   name: 'App',
-  created() {
-  },
   components: { List },
   data() {
     return {
+      persons: People,
       reserveTab: true,
       name: '',
       date: '',
       displayReserve: true,
       reserves: [
         {date: '2023-01-01', 
-          pessoas: [
+          persons: [
             {name: 'Diego Vieira'},
             {name: 'Renata Nunes'},
             {name: 'Marcos Alves'},
@@ -60,14 +67,14 @@ export default {
           ]  
         },
         {date: '2023-01-02', 
-          pessoas: [
+          persons: [
             {name: 'Popó da Bahia'},
             {name: 'Tania Pires'},
             {name: 'Marco Antonio'}
           ]  
         },
         {date: '2023-01-03', 
-          pessoas: [
+          persons: [
             {name: 'Maria do Bairro'},
             {name: 'Antônia Felipa'},
             {name: 'Mario Flores'}
@@ -88,7 +95,15 @@ export default {
     }
   },
   methods: {
-    reserveMessage(m, time, type, ) {
+
+    isRegistred() {
+      
+    },
+
+    mostrarModal() {
+      this.$refs['my-modal'].show()
+    },
+    reserveMessage(m, time, type) {
       this.message.status = true
       this.message.text = m
       this.message.type = type
@@ -116,24 +131,25 @@ export default {
             obj.name = this.name
             if(this.reserves[index] === undefined) {
               const obj = {}
-              obj.pessoas = []
+              obj.persons = []
               obj.date = this.date
               obj.dateFormated = this.formatDate(this.date)
               const objPerson = {}
               objPerson.name = this.name
-              obj.pessoas.push(objPerson)
+              obj.persons.push(objPerson)
               this.reserves.push(obj)
+              this.date = ''
+              this.name = ''
+              this.reserveMessage('Reserva realizada com sucesso !', 1500, 'success')
+              inpDate.focus()
             } else {
-              const index = this.reserves.findIndex((reserve) => reserve.date === this.date)
-              const obj = {}
-              obj.name = this.name
-              this.reserves[index].pessoas.push(obj)
+              this.reserveMessage('Já existe uma reserva para o nome informado.', 1500, 'danger')
+              // const index = this.reserves.findIndex((reserve) => reserve.date === this.date)
+              // const obj = {}
+              // obj.name = this.name
+              // this.reserves[index].persons.push(obj)
             }
-            this.date = ''
-            this.name = ''
-            inpDate.focus()
-            this.message.text = ''
-            this.reserveMessage('Reserva realizada com sucesso !', 2000, 'success')
+            // this.message.text = ''
           } else {
             const index = this.waitingList.findIndex((reserve) => reserve.date === this.date)
             if(index) {
@@ -168,18 +184,18 @@ export default {
       },
       cancel(p) {
         if(p === '') {
-          this.reserveMessage('Selecione o nome que deseja cancelar a reserva.', 2000)
+          this.reserveMessage('Selecione o nome que deseja cancelar a reserva.', 1500)
         } else {
           this.selectedName = p
           const confirmation = confirm(`${p}, deseja realmente cancelar sua reserva ?`)
           const indexDate = this.reserves.findIndex((p) => p.date === this.selectedDate)
-          const indexName = this.reserves[indexDate].pessoas.findIndex((p) => p.name === this.selectedName)
-          this.reserves[indexDate].pessoas.splice(indexName, 1)
-          this.reserveMessage('Reserva cancelada !', 2000, 'success')
+          const indexName = this.reserves[indexDate].persons.findIndex((p) => p.name === this.selectedName)
+          this.reserves[indexDate].persons.splice(indexName, 1)
+          this.reserveMessage('Reserva cancelada !', 1500, 'success')
           setTimeout(() => {
             this.reserveTab = true
           }, 3000);
-          if(this.reserves[indexDate].pessoas.length === 0) {
+          if(this.reserves[indexDate].persons.length === 0) {
             this.reserves.splice(indexDate)
           }
         }
@@ -208,7 +224,7 @@ export default {
           const finder = this.reserves.find((reserve) => reserve.date === this.date)
           // Novo dia sem nenhuma reserva
           if(finder !== undefined) {
-            const reserves = ((this.reserves.find((reserve) => reserve.date === this.date).pessoas).length)
+            const reserves = ((this.reserves.find((reserve) => reserve.date === this.date).persons).length)
             this.vacancies = 10 - reserves
             // Dia com reservas porém com vagas disponíveis
             if(reserves < 10) {
@@ -234,7 +250,7 @@ export default {
     computed: {
       filteredNames() {
         const reserves = this.reserves.find((reserve) => reserve.date === this.selectedDate)
-        return reserves ? reserves.pessoas : []
+        return reserves ? reserves.persons : []
       }
     }
   }

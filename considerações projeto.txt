@@ -1,0 +1,17 @@
+Pontos Marcos
+
+- plugin do vue(volar)
+- Dados de teste em um componente externo
+- vacancies em computed properties
+- melhorar o componente list(mudar o nome)
+- criar um metodo computado para os findIndex
+- verificar a estrutura das reservas.. incluir data inteira
+- validação para pessoas com mesmo nome
+- cpf(chave)
+- modais alert em bootstrap vue
+
+
+
+-utilizar vuex
+
+substituir o find index de data para " this.reserves['2023-05-01]"
