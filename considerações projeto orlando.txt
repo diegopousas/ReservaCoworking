@@ -1,7 +1,6 @@
 - Ordenar nomes;
 - Desabilitar botão quando campos não preenchidos;
 - Tooltip nos botoes quando campos não preenchidos;
-- erro no cancelamento ao selecionar cancelar
 - label do cancelamento(sim e não)
 - não permitir reservas de dias anteriores ao atual e nem para o mesmo dia;
 - tela cadastro(novo componente);
@@ -13,3 +12,4 @@ olhar telas de mov e registro
 concluidos
 
 - não permitir nomes iguais;
+- erro no cancelamento ao selecionar cancelar (clicando em cancelar no alert box a reserva é cancelada)

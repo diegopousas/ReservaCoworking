@@ -1,53 +1,60 @@
 <template>
-  <div id="app">
-    <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut" appear mode="out-in">
-      <div class="reserveTab" v-if="reserveTab">
-        <h1>Agendamento Coworking</h1>
-          <p>Qual a data que deseja agendar ? <input type="date" class="inpDate" v-model="date" @blur="haveVacancy"></p>
-          <p>Informe seu nome: <input type="text" class="inpName" v-model="name" @keydown.enter="reserve"></p>
-          <p>
-            <b-button id="reserveButton" class="mr-2" variant="success" size="sm" @click="reserve">Salvar</b-button> 
-            <b-button class="mr-2" variant="danger" size="sm" v-show="reserves.length" @click="cancelTab">Cancelar Reserva</b-button>
-            <b-button variant="info" size="sm" disabled style="text-decoration: line-through;">Dias Disponíveis</b-button>
-            <!-- <b-button class="ml-2" size="sm" @click="mostrarModal">Mostrar Modal</b-button> -->
-          </p>
+  <transition enter-active-class="animate__animated animate__fadeIn" appear>
+    <div id="app">
+        <div class="reserveTab" v-if="reserveTab">
+          <h1 class="titlePage">Agendamento Coworking</h1>
+          <b-card>
+              <b-form-group label="Data agendamento: ">
+                <b-input type="date" class="inpDate" v-model="date" @blur="haveVacancy" size="sm"/>
+              </b-form-group>
+              <b-form-group label="Informe seu Nome: " placeholder="Informe o seu nome aqui...">
+                <b-input type="text" class="inpName" v-model="name" @keydown.enter="searchName" size="sm"/>
+              </b-form-group>
+              <b-button id="reserveButton" class="mr-2" variant="success" size="sm" @click="searchName">Salvar</b-button> 
+              <b-button class="mr-2" variant="danger" size="sm" v-show="reserves.length" @click="cancelTab">Cancelar Reserva</b-button>
+              <b-button variant="info" size="sm" @click="registerNewColaborator">Cadastro Colaborador</b-button>
+            </b-card>
         </div>
-        <div class="cancellationTab" v-else>
-          <h1>Cancelamento Reserva</h1>
-            <p v-if="reserves.length">Informe qual a data da reserva que deseja cancelar
-              <select v-model="selectedDate">
-                <option v-for="reserve in reserves" :value="reserve.date">{{ formatDate(reserve.date) }}</option>
-              </select>
-            </p>
-          <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut" mode="out-in">
-              <List v-if = "selectedDate" 
-              :filtered-names = "filteredNames"
-              @canceled="cancel($event)"
-              @goHome="reserveTab = true"/>
+          <div v-if="cancellationTab">
+            <h1>Cancelamento Reserva</h1>
+              <p v-if="reserves.length">Informe qual a data da reserva que deseja cancelar
+                <select size="md" v-model="selectedDate">
+                  <option v-for="reserve in reserves" :value="reserve.date">{{ formatDate(reserve.date) }}</option>
+                </select>
+                <b-button variant="info" size="sm" class="ml-2" @click="reserveTab = true" v-if="!this.selectedDate">Voltar ao inicio</b-button>
+              </p>
+                <List v-if = "selectedDate" 
+                :filtered-names = "filteredNames"
+                @canceled="cancel($event)"
+                @goHome="reserveTab = true"/>
+            </div>
+          <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
+            <b-alert v-if="message.status" show :variant="message.type" :size="message.size">{{ message.text }}</b-alert>
           </transition>
-          </div>
-        </transition>
-        <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
-          <b-alert v-if="message.status" show :variant="message.type" :size="message.size">{{ message.text }}</b-alert>
-        </transition>
-        <b-modal ref="my-modal" hide-footer title="Using Component Methods">
-          <div class="modalCancell">
-            <b-button class="mr-1">Sim</b-button>
-            <b-button>Não</b-button>
-          </div>
-        </b-modal>
-  </div>
+          <b-modal ref="my-modal" hide-footer title="Using Component Methods">
+            <div class="modalCancell">
+              <b-button class="mr-1">Sim</b-button>
+              <b-button>Não</b-button>
+            </div>
+          </b-modal>
+          <Register v-if="newColaborator"
+            @backingHome="initialState"
+            :name="preName"
+          />
+    </div>
+  </transition>
 </template>
 <script>
 import List from './components/List.vue'
-import People from './components/People'
+import Register from './components/Register.vue'
 export default {
   name: 'App',
-  components: { List },
+  components: { List, Register },
   data() {
     return {
-      persons: People,
+      preName: '',
       reserveTab: true,
+      cancellationTab: false,
       name: '',
       date: '',
       displayReserve: true,
@@ -91,13 +98,47 @@ export default {
         status: false,
         text: '',
         type: ''
+      },
+      isRegistred: false,
+      newColaborator: false,
+      modal: {
+        text: '',
+        ok: '',
+        cancel: '',
+        resModal: ''
       }
     }
   },
   methods: {
 
-    isRegistred() {
-      
+    initialState() {
+      this.reserveTab = true
+      this.cancellationTab = false
+      this.newColaborator = false
+    },
+
+    searchName() {
+      const nameSearch = this.name.toLowerCase()
+      this.isRegistred = this.reserves.some(reserve => 
+      reserve.persons.some(person => person.name.toLowerCase() === nameSearch))
+      if(this.isRegistred) {
+        this.reserve()
+      } else {
+        setTimeout(() => {
+          this.reserveTab = false
+          this.cancellationTab = false
+          this.newColaborator = true
+        }, 3000)
+        console.log(this.preName)
+        this.reserveMessage('Você ainda não tem cadastro em nosso sistema, favor realiza-lo antes de realizar uma reserva.', 3000, 'warning')
+      }
+      this.preName = this.name
+    },
+
+    registerNewColaborator() {
+      this.newColaborator = true
+      this.reserveTab = false
+      this.cancellationTab = false
     },
 
     mostrarModal() {
@@ -181,6 +222,7 @@ export default {
       cancelTab() {
         this.selectedDate = '',
         this.reserveTab = false
+        this.cancellationTab = true    
       },
       cancel(p) {
         if(p === '') {
@@ -188,19 +230,22 @@ export default {
         } else {
           this.selectedName = p
           const confirmation = confirm(`${p}, deseja realmente cancelar sua reserva ?`)
-          const indexDate = this.reserves.findIndex((p) => p.date === this.selectedDate)
-          const indexName = this.reserves[indexDate].persons.findIndex((p) => p.name === this.selectedName)
-          this.reserves[indexDate].persons.splice(indexName, 1)
-          this.reserveMessage('Reserva cancelada !', 1500, 'success')
-          setTimeout(() => {
-            this.reserveTab = true
-          }, 3000);
-          if(this.reserves[indexDate].persons.length === 0) {
-            this.reserves.splice(indexDate)
+          if(confirmation) {
+            const indexDate = this.reserves.findIndex((p) => p.date === this.selectedDate)
+            const indexName = this.reserves[indexDate].persons.findIndex((p) => p.name === this.selectedName)
+            this.reserves[indexDate].persons.splice(indexName, 1)
+            this.reserveMessage('Reserva cancelada !', 1500, 'success')
+            setTimeout(() => {
+              this.reserveTab = true
+            }, 3000);
+            if(this.reserves[indexDate].persons.length === 0) {
+              this.reserves.splice(indexDate)
+            }
+          } 
+          this.reserveTab = false
           }
-        }
-        this.reserveTab = false
-      },  
+        },  
+
       newDate(date) {
         const arr = date.split('-')
         const dia = parseInt(arr[2])
@@ -264,6 +309,23 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.titlePage {
+  margin-bottom: 50px;
+}
+
+.reserveTab {
+  width: 80%;
+  margin: auto;
+}
+
+.inpDate {
+  text-align: center;
+}
+
+.inpName {
+  text-align: center;
 }
 
 .lista li {
