@@ -1,4 +1,105 @@
 <template>
+  <div id="app">
+    <b-card id="title" class="mt-2">Reserva Coworking Demarco</b-card>
+    <div id="navBar" class="mt-2">
+      <Menu class="mt-3"/>
+    </div>
+    <router-view></router-view>
+    <Footer class="mt-5"/>
+  </div>
+</template>
+
+<script>
+import Menu from './components/mainMenu.vue'
+import Footer from './components/Footer.vue'
+export default {
+  components: { Menu, Footer }
+}
+</script>
+
+<style>
+#app {
+  margin: auto;
+  width: 80%;
+  font-family: 'Poppins', sans-serif;
+}
+
+#title {
+  text-align: center;
+  font-size: 27px;
+  background: black;
+  color: white;
+}
+
+#navBar {
+  text-align: center;
+}
+
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <template>
   <transition enter-active-class="animate__animated animate__fadeIn" appear>
     <div id="app">
         <div class="reserveTab" v-if="reserveTab">
@@ -14,12 +115,13 @@
               <b-button class="mr-2" variant="danger" size="sm" v-show="reserves.length" @click="cancelTab">Cancelar Reserva</b-button>
               <b-button variant="info" size="sm" @click="registerNewColaborator">Cadastro Colaborador</b-button>
             </b-card>
+            <router-view></router-view>
         </div>
           <div v-if="cancellationTab">
             <h1>Cancelamento Reserva</h1>
               <p v-if="reserves.length">Informe qual a data da reserva que deseja cancelar
                 <select size="md" v-model="selectedDate">
-                  <option v-for="reserve in reserves" :value="reserve.date">{{ formatDate(reserve.date) }}</option>
+                  <option v-for="(reserve, id) in reserves" :value="reserve.date" :key="id">{{ formatDate(reserve.date) }}</option>
                 </select>
                 <b-button variant="info" size="sm" class="ml-2" @click="reserveTab = true" v-if="!this.selectedDate">Voltar ao inicio</b-button>
               </p>
@@ -365,4 +467,4 @@ export default {
   transition: fade 1s;
 }
 
-</style>
+</style> -->
