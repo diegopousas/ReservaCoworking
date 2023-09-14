@@ -10,7 +10,7 @@
       </router-link>
 
       <router-link to="/reserves" tag="li" class="mr-5" active-class="active">
-        <a>Reservas</a>
+        <a>Reserva</a>
       </router-link>
     </ul>
   </div>
@@ -39,7 +39,8 @@ ul li a {
 }
 .active {
   background-color: crimson;
-  border-radius: 5px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
   padding: 5px;
   color: white;
 }
