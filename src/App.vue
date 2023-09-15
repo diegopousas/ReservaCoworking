@@ -2,7 +2,7 @@
   <div id="app">
     <b-card id="title" class="mt-2">Reserva Coworking Demarco</b-card>
     <div id="navBar" class="mt-2">
-      <Menu class="mt-3"/>
+      <Menu />
     </div>
     <router-view></router-view>
     <Footer class="mt-5"/>

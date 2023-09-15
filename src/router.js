@@ -9,6 +9,7 @@ import Reserves from './components/Reserve.vue'
 Vue.use(Router)
 
 export default new Router({
+    mode: 'history',
     routes: [{
         path: '/',
         component: Home
@@ -17,10 +18,11 @@ export default new Router({
         component: Users
     }, {
         path: '/register',
-        component: Register
-    }, {
-        path: '/register/list',
-        component: RegisterList
+        component: Register,
+        children: [{
+            path: 'list',
+            component: RegisterList
+        }]
     }, {
         path: '/reserves',
         component: Reserves

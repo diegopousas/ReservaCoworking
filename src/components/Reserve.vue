@@ -32,6 +32,7 @@ h4 {
 
 img {
   width: 80%;
+  opacity: 20%;
 }
 
 </style>

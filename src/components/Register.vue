@@ -3,10 +3,12 @@
   <div class="registrationTab">
     <h3>Cadastro de Colaboradores</h3>
     <div class="buttonsMenuSecondary">
+
       <ul>
-        <router-link to="/register/list" tag="li"><a>Colaboradores Cadastrados</a></router-link>
+        <router-link to="/register/list" tag="b-button"><a>Colaboradores Cadastrados</a></router-link>
       </ul>
     </div>
+    <router-view />
     <div class="alertBox">
       <b-alert
         class="alert"
@@ -84,6 +86,7 @@ export default {
 </script>
 
 <style scooped>
+
 .alert {
   text-align: center;
   font-family: "Poppins", sans-serif;
