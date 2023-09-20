@@ -5,6 +5,7 @@
       <Menu />
     </div>
     <router-view></router-view>
+    <router-view name="novoMenu"></router-view>
     <Footer class="mt-5"/>
   </div>
 </template>

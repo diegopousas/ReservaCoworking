@@ -3,12 +3,13 @@
   <div class="registrationTab">
     <h3>Cadastro de Colaboradores</h3>
     <div class="buttonsMenuSecondary">
-
       <ul>
-        <router-link to="/register/list" tag="b-button"><a>Colaboradores Cadastrados</a></router-link>
+        <router-link to="/register/list" tag="b-button"
+          ><a>Colaboradores Cadastrados</a>
+        </router-link>
       </ul>
     </div>
-    <router-view />
+      <router-view />
     <div class="alertBox">
       <b-alert
         class="alert"
@@ -18,18 +19,33 @@
         >{{ message.text }}</b-alert
       >
     </div>
-    <label>Nome: </label
-      ><b-input id="inpName" size="sm" v-model="collaborator.name" placeholder="Informe seu nome"></b-input>
+
+    <!-- mudar essa div aqui de baixo para um b-form-group -->
+
+    <div>
+      <label>Nome: </label
+      ><b-input
+        id="inpName"
+        size="sm"
+        v-model="collaborator.name"
+        placeholder="Informe seu nome"
+      ></b-input>
       <label>CPF: </label
-        ><b-input id="inpCPF" size="sm" v-model="collaborator.cpf" placeholder="Informe seu CPF"></b-input>
-        <div class="buttons">
-          <b-button
+      ><b-input
+        id="inpCPF"
+        size="sm"
+        v-model="collaborator.cpf"
+        placeholder="Informe seu CPF"
+      ></b-input>
+      <div class="buttons">
+        <b-button
           size="sm"
           variant="success"
           class="ml-2 mt-2"
           @click="validator"
           >Cadastrar</b-button
-      >
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -51,16 +67,15 @@ export default {
   props: ["preName"],
   methods: {
     validator() {
-      if(this.collaborator.name === '' || this.collaborator.cpf === '') {
-        this.message.state = false
-        this.message.text = 'Existem campos obrigatórios em branco.'
-        this.message.state = true
-        this.message.variant = 'warning'
+      if (this.collaborator.name === "" || this.collaborator.cpf === "") {
+        this.message.state = false;
+        this.message.text = "Existem campos obrigatórios em branco.";
+        this.message.state = true;
+        this.message.variant = "warning";
       } else {
-        this.newCollaborator()
+        this.newCollaborator();
       }
     },
-
     clear() {
       this.collaborator.name = "";
       this.collaborator.cpf = "";
@@ -70,8 +85,12 @@ export default {
       this.$http.post("collaborators.json", this.collaborator).then(() => {
         this.clear();
         this.message.text = "Cadastro realizado com sucesso !";
+        this.message.variant = "success";          
         this.message.state = true;
-        this.message.variant = "success";
+      setTimeout(() => {
+        this.message.state = false
+        this.$router.push('/reserves')
+        }, 3000);
       });
     },
     goHome() {
@@ -86,7 +105,6 @@ export default {
 </script>
 
 <style scooped>
-
 .alert {
   text-align: center;
   font-family: "Poppins", sans-serif;
@@ -148,4 +166,5 @@ ul li {
 .active {
   color: red;
 }
+
 </style>

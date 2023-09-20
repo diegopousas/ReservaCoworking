@@ -5,12 +5,27 @@
         <a>Inicio</a>
       </router-link>
 
-      <router-link to="/register" class="mr-5" tag="li" active-class="active" exact>
+      <router-link
+        to="/register"
+        class="mr-5"
+        tag="li"
+        active-class="active"
+        exact
+      >
         <a>Cadastro</a>
       </router-link>
 
       <router-link to="/reserves" tag="li" class="mr-5" active-class="active">
         <a>Reserva</a>
+      </router-link>
+
+      <router-link
+        :to="{ path: '/testeQuery' }"
+        tag="li"
+        class="mr-5"
+        active-class="active"
+      >
+        <a>Teste</a>
       </router-link>
     </ul>
   </div>
@@ -24,9 +39,9 @@ export default {
 
 <style scoped>
 ul {
-    width: 60%;
-    margin: auto;
-  }
+  width: 60%;
+  margin: auto;
+}
 
 ul li {
   display: inline-block;
@@ -48,6 +63,4 @@ ul li a {
 .active a {
   color: white;
 }
-
-
 </style>
