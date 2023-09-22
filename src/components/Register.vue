@@ -1,15 +1,21 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="registrationTab">
+
+<div>
+  <b-form>
     <h3>Cadastro de Colaboradores</h3>
-    <div class="buttonsMenuSecondary">
-      <ul>
-        <router-link to="/register/list" tag="b-button"
-          ><a>Colaboradores Cadastrados</a>
-        </router-link>
-      </ul>
-    </div>
-      <router-view />
+      <b-alert :variant="message.variant" :dimissible="message.dimissible" :show="message.state" >{{ message.text }}</b-alert>
+    <b-form-group>
+      <b-form-input id="inpName" class="mt-3" v-model="collaborator.name" placeholder="Informe seu nome"></b-form-input>
+      <b-form-input id="inpCPF" class="mt-3" v-model="collaborator.cpf" placeholder="Informe seu CPF"></b-form-input>
+      <div class="buttons">
+        <b-button size="sm" variant="success" class="ml-2 mt-2" @click="validator" v-b-tooltip.bottom :title="message.button" :disabled="disableButtonRegister">Cadastrar</b-button>
+        <b-button size="sm" variant="info" class="ml-2 mt-2" v-b-tooltip.bottom title="Visualizar Cadastros">Visualizar Cadastros</b-button>
+
+      </div>
+    </b-form-group>
+  </b-form>
+  <!-- 
     <div class="alertBox">
       <b-alert
         class="alert"
@@ -18,11 +24,9 @@
         dismissible
         >{{ message.text }}</b-alert
       >
-    </div>
-
+    </div> -->
     <!-- mudar essa div aqui de baixo para um b-form-group -->
-
-    <div>
+    <!-- <div>
       <label>Nome: </label
       ><b-input
         id="inpName"
@@ -45,8 +49,14 @@
           @click="validator"
           >Cadastrar</b-button
         >
+        <b-button
+          size="sm"
+          variant="info"
+          class="ml-2 mt-2"
+          >Visualizar Cadastros</b-button
+        >
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -59,15 +69,17 @@ export default {
       message: {
         text: "",
         state: false,
-        dismissible: false,
+        dimissible: false,
         variant: "",
+        button: ''
       },
+      cols: []
     };
   },
   props: ["preName"],
   methods: {
     validator() {
-      if (this.collaborator.name === "" || this.collaborator.cpf === "") {
+      if(this.collaborator.name === "" || this.collaborator.cpf === "") {
         this.message.state = false;
         this.message.text = "Existem campos obrigatórios em branco.";
         this.message.state = true;
@@ -100,7 +112,38 @@ export default {
       this.id = id;
       this.collaborator = { ...this.collaborators[id] };
     },
+    setMessageButton() {
+      if(!this.collaborator.name && !this.collaborator.cpf) {
+        this.message.button = 'Os campos nome e CPF devem estar preenchidos...'
+      } else if(!this.collaborator.cpf) {
+        this.message.button = 'O campo CPF é obrigatório, favor preenche-lo...'
+      } else if(!this.collaborator.name) {
+        this.message.button = 'O campo nome é obrigatório, favor preenche-lo...'
+      } else {
+        this.message.button = 'Cadastrar'
+      }
+    },
+    conectDB() {
+      this.$http('collaborators.json')
+        .then((res) => this.cols = res.data)
+    }
   },
+  computed: {
+    disableButtonRegister() {
+      if(this.collaborator.name && this.collaborator.cpf) {
+        this.setMessageButton()
+        return false
+      } else {
+        this.setMessageButton()
+        return true
+      }
+    }
+  },
+
+  created() {
+    this.conectDB()
+  }
+
 };
 </script>
 
@@ -127,7 +170,7 @@ a {
 .buttons {
   text-align: center;
   margin: auto;
-  margin-top: 60px;
+  margin-top: 30px;
 }
 
 .buttonsMenuSecondary {
@@ -136,12 +179,18 @@ a {
   text-align: center;
 }
 
+#buttonRegisters {
+  background-color: white;
+  color: black;
+}
+
 .buttonsMenuSecondary a {
   text-decoration: none;
 }
 
 h3 {
   text-align: center;
+  margin-top: 30px;
 }
 
 #inpName {
@@ -163,8 +212,5 @@ ul li {
   display: inline-block;
 }
 
-.active {
-  color: red;
-}
 
 </style>

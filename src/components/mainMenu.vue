@@ -1,32 +1,18 @@
 <template>
   <div>
     <ul>
-      <router-link to="/" class="mr-5" tag="li" active-class="active" exact>
+      <router-link to="/" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Inicio">
         <a>Inicio</a>
       </router-link>
 
-      <router-link
-        to="/register"
-        class="mr-5"
-        tag="li"
-        active-class="active"
-        exact
-      >
+      <router-link to="/register" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Cadastro">
         <a>Cadastro</a>
       </router-link>
 
-      <router-link to="/reserves" tag="li" class="mr-5" active-class="active">
+      <router-link to="/reserves" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Reserva">
         <a>Reserva</a>
       </router-link>
 
-      <router-link
-        :to="{ path: '/testeQuery' }"
-        tag="li"
-        class="mr-5"
-        active-class="active"
-      >
-        <a>Teste</a>
-      </router-link>
     </ul>
   </div>
 </template>

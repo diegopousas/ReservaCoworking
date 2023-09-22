@@ -5,6 +5,7 @@ import Users from "./components/List.vue";
 import Register from "./components/Register.vue";
 import RegisterList from "./components/RegisterList.vue";
 import Reserves from "./components/Reserve.vue";
+import StudyArea from "./components/StudyArea.vue"
 
 import TesteQuery from "./components/Teste.vue";
 import ResTeste from "./components/RespostaTask.vue";
@@ -14,6 +15,11 @@ Vue.use(Router);
 const router = new Router({
   mode: "history",
   routes: [
+    {
+      name: "Study",
+      path: '/study',
+      component: StudyArea
+    },
     {
       name: "Teste",
       path: "/testeQuery",

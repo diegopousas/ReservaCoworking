@@ -16,6 +16,8 @@
         <b-modal ref="modalDelete" show
           ok-variant="danger"
           cancel-variant="info"
+          ok-title="Sim"
+          cancel-title="Não"
           no-close-on-esc
           hide-header-close
           @ok="teste"

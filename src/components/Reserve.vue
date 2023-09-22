@@ -1,19 +1,14 @@
 <template>
   <div>
-    <!-- <b-form-group 
-      label="Informe seu Nome: "
-      v-for="(name, id) in collaborators" 
-      :key="id">
-    <b-form-select :options="name" v-model="selected"></b-form-select>
-    </b-form-group> -->
+    <b-form-group title="Reserva" label="Selecione seu Nome: ">
+      <b-form-select
+        v-model="selected"
+        :options="collaborators"
+        :value="collaborators.data">
+  
+      </b-form-select>
+    </b-form-group>
 
-
-    <b-form-select
-      v-model="selected"
-      :options="collaborators"
-      :value="collaborators.data">
-
-    </b-form-select>
 
 
     <b-button @click="teste" class="mt-5">Salvar</b-button>
@@ -43,6 +38,7 @@ name: 'reserveComp',
   this.$http('collaborators.json')
     .then((res) => {
       this.collaborators = res.data
+      console.log(this.collaborators)
     })
   },
   methods: {
