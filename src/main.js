@@ -14,6 +14,10 @@ Vue.filter('money', value => {
   return `R$ ${parseFloat(value).toFixed(2)}`.replace('.',',')
 })
 
+Vue.filter('cpf', value => {
+  return `${value[0]}${value[1]}${value[2]}.***.***-**`
+})
+
 new Vue({
   router,
   store,

@@ -2,28 +2,11 @@
   <div>
     <b-form-group title="Reserva" label="Selecione seu Nome: ">
       <b-form-select
-        v-model="selected"
-        :options="collaborators"
-        :value="collaborators.data">
-  
+        v-model="selected">
+          <option :value="null" disabled>-- Selecione seu nome --</option>
+          <option v-for="(collab, id) in collaboratorsList" :key="id">{{ collab.name }} - {{ collab.cpf | cpf }}</option>  
       </b-form-select>
     </b-form-group>
-
-    <p v-for="(teste, id) in testee" :key="id">{{ teste.name }}</p>
-
-
-
-    <b-button @click="teste" class="mt-5">Salvar</b-button>
-
-
-
-
-
-<!-- 
-    <b-form-group
-      label="Data da Reserva">
-    <b-input type="date"></b-input>
-    </b-form-group> -->
   </div>
 </template>
 
@@ -32,7 +15,7 @@ export default {
 name: 'reserveComp',
   data() {
     return {
-      selected: '',
+      selected: 'null',
       collaborators: []
     }
   },
@@ -42,15 +25,14 @@ name: 'reserveComp',
       this.collaborators = res.data
     })
   },
-  methods: {
-    teste() {
-      console.log(typeof(this.collaborators))
-      console.log(this.selected)
-    }
-  },
   computed: {
     collaboratorsList() {
       return Object.values(this.collaborators)
+    }
+  },
+  watch: {
+    'selected': function() {
+      console.log(this.selected)
     }
   }
 }
