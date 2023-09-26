@@ -10,8 +10,7 @@
       <b-form-input id="inpCPF" class="mt-3" v-model="collaborator.cpf" placeholder="Informe seu CPF"></b-form-input>
       <div class="buttons">
         <b-button size="sm" variant="success" class="ml-2 mt-2" @click="validator" v-b-tooltip.bottom :title="message.button" :disabled="disableButtonRegister">Cadastrar</b-button>
-        <b-button size="sm" variant="info" class="ml-2 mt-2" v-b-tooltip.bottom title="Visualizar Cadastros">Visualizar Cadastros</b-button>
-
+        <b-button size="sm" variant="info" class="ml-2 mt-2" v-b-tooltip.bottom title="Visualizar Cadastros" :disabled="disableButtonRegisterList">Visualizar Cadastros</b-button>
       </div>
     </b-form-group>
   </b-form>
@@ -123,10 +122,10 @@ export default {
         this.message.button = 'Cadastrar'
       }
     },
-    conectDB() {
+    connectDB() {
       this.$http('collaborators.json')
         .then((res) => this.cols = res.data)
-    }
+    },
   },
   computed: {
     disableButtonRegister() {
@@ -137,11 +136,18 @@ export default {
         this.setMessageButton()
         return true
       }
+    },
+    disableButtonRegisterList() {
+      if(this.cols == null) {
+        return true
+      } else {
+        return false
+      }
     }
   },
 
   created() {
-    this.conectDB()
+    this.connectDB()
   }
 
 };

@@ -7,9 +7,8 @@
     <body>
       <h1>Área de Estudos e Testes</h1>
       <hr>
-      <h2>Aprendendo Vuex</h2>
-      <b-input v-model="dado" type="number"></b-input>
-      <p v-show="dado">{{ dado | money }}</p>
+      <p v-for="produto in produtos" :key="produto.id">{{ produto.nome }} - {{ produto.preco | money }}</p>
+      <b-button @click="tamanho">Tamanho</b-button>
     </body>
 
     <div id="content">
@@ -22,9 +21,17 @@
 <script>
 export default {
 
-  data() {
-    return {
-      dado: ''
+  methods: {
+    tamanho() {
+      const a = this.$store.state.produtos
+      console.log(a.length)
+    }
+  },
+
+
+  computed: {
+    produtos() {
+      return this.$store.state.produtos
     }
   },
 

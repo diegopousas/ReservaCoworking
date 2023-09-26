@@ -9,11 +9,20 @@
         <b-list-group-item v-for="(collab, id) in collaborators" :key="id">
           <strong>Nome: </strong> {{ collab.name }} <br />
           <strong>CPF: </strong> {{ collab.cpf }} <br />
-          <b-button size="sm" class="mt-2 ml-2" variant="danger" @click="deleteCollaborator(id)">Excluir</b-button>
-          <b-button size="sm" class="mt-2 ml-2" variant="warning" disabled>Editar</b-button
+          <b-button
+            size="sm"
+            class="mt-2 ml-2"
+            variant="danger"
+            @click="deleteCollaborator(id)"
+            >Excluir</b-button
+          >
+          <b-button size="sm" class="mt-2 ml-2" variant="warning" disabled
+            >Editar</b-button
           >
         </b-list-group-item>
-        <b-modal ref="modalDelete" show
+        <b-modal
+          ref="modalDelete"
+          show
           ok-variant="danger"
           cancel-variant="info"
           ok-title="Sim"
@@ -21,10 +30,9 @@
           no-close-on-esc
           hide-header-close
           @ok="teste"
-          >
+        >
           <p>Deseja realmente excluir o colaborador selecionado ?</p>
         </b-modal>
-
       </div>
     </b-list-group>
   </div>
@@ -32,58 +40,67 @@
 
 <script>
 export default {
-name: 'ReservesComp',
+  name: "ReservesComp",
   data() {
     return {
-      id: '',
+      id: "",
       collaborators: [],
       delete: false,
       alert: {
         status: false,
-        message: '',
-        variant: '',
-        time: ''
-      }
-    }
+        message: "",
+        variant: "",
+        time: "",
+      },
+    };
   },
   mounted() {
-    this.showCollaborators()
+    this.showCollaborators();
   },
   methods: {
-
     showAlert(message, variant, time) {
-      this.alert.time = time
+      this.alert.time = time;
       setTimeout(() => {
-        this.alert.message = message
-        this.alert.variant = variant      
-      }, time)
+        this.alert.message = message;
+        this.alert.variant = variant;
+      }, time);
     },
     showCollaborators() {
-        this.$http("collaborators.json").then((res) => {
-          this.collaborators = res.data;
-          if(this.collaborators === null) {
-            this.showAlert('true', 'Nenhum cadastro encontrado !', 'info', 2000)
-          }
+      this.$http("collaborators.json").then((res) => {
+        this.collaborators = res.data;
+        if (this.collaborators === null) {
+          this.showAlert("true", "Nenhum cadastro encontrado !", "info", 2000);
+        }
       });
     },
     deleteCollaborator(id) {
-      this.$refs.modalDelete.show()
-      this.id = id
+      this.$refs.modalDelete.show();
+      this.id = id;
     },
 
-    teste() {
-      this.$http.delete(`/collaborators/${this.id}.json`)
-      console.log('deletado')
+    //apagar o método abaixo
+
+    testee() {
+      this.$http.delete(`/collaborators/${this.id}.json`);
+      console.log("deletado");
       setTimeout(() => {
-        this.showCollaborators()
+        this.showCollaborators();
       }, 1000);
-    }
+    },
   },
-}
+  computed: {
+    teste() {
+      if(this.collaborators) {
+        return Object.values(this.collaborators)
+      } else {
+        return false
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
-
 h3 {
   text-align: center;
   margin-top: 30px;
@@ -100,6 +117,4 @@ h3 {
   margin: auto;
   text-align: center;
 }
-
-
 </style>

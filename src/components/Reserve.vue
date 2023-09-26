@@ -9,6 +9,8 @@
       </b-form-select>
     </b-form-group>
 
+    <p v-for="(teste, id) in testee" :key="id">{{ teste.name }}</p>
+
 
 
     <b-button @click="teste" class="mt-5">Salvar</b-button>
@@ -38,12 +40,17 @@ name: 'reserveComp',
   this.$http('collaborators.json')
     .then((res) => {
       this.collaborators = res.data
-      console.log(this.collaborators)
     })
   },
   methods: {
     teste() {
+      console.log(typeof(this.collaborators))
       console.log(this.selected)
+    }
+  },
+  computed: {
+    collaboratorsList() {
+      return Object.values(this.collaborators)
     }
   }
 }
