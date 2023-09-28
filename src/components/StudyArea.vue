@@ -4,15 +4,21 @@
       hide-footer
       hide-header
       centered>Você esta sendo redirecionado à área de testes e estudos...</b-modal>
-    <body>
-      <h1>Área de Estudos e Testes</h1>
-      <hr>
-      <p v-for="produto in produtos" :key="produto.id">{{ produto.nome }} - {{ produto.preco | money }}</p>
-      <b-button @click="tamanho">Tamanho</b-button>
-    </body>
 
     <div id="content">
-
+      <b-form-group
+        label="Insira um dado aqui: ">
+        <b-input 
+          v-model="description"/>
+      </b-form-group>
+      <b-form-group
+        label="Insira um valor aqui: ">
+        <b-input 
+          v-model="value"/>
+      </b-form-group>
+      <b-button @click="save" variant="primary">Save</b-button>
+      <b-button @click="show" class="ml-1">Mostrar</b-button>
+      <hr class="mt-5">
     </div>
 
   </div>
@@ -20,11 +26,27 @@
 
 <script>
 export default {
-
+  data() {
+    return {
+      description: '',
+      value: ''
+    }
+  },
   methods: {
-    tamanho() {
+
+    clear() {
+      this.description = ''
+      this.value = ''
+    },
+
+    save() {
+      this.$store.state.produtos.push({ description: this.description, value: this.value })
+      this.clear()
+    },
+
+    show() {
       const a = this.$store.state.produtos
-      console.log(a.length)
+      console.log(a)
     }
   },
 
@@ -35,29 +57,24 @@ export default {
     }
   },
 
-  mounted() {
-    setTimeout(() => {
-      this.$refs.modal.hide()
-    }, 5000);
-    this.$refs.modal.show()      
-  },
+  // mounted() {
+  //   setTimeout(() => {
+  //     this.$refs.modal.hide()
+  //   }, 5000);
+  //   this.$refs.modal.show()      
+  // },
 }
 </script>
 
 <style scoped>
-
-body {
-  width: 50%;
-  margin: auto;
-  margin-top: 20px;
-}
 
 body h1, h2 {
   text-align: center;
 }
 
 #content {
-  height: 600px;
+  height: 300px;
+  margin-top: 40px;
 }
 
 h2 {
