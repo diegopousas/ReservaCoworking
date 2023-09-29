@@ -8,16 +8,11 @@
             {{ collab.name }} - {{ collab.cpf | cpf }}
           </option>  
       </b-form-select>
-      <b-modal ref="alert" size="lg" ok-only hide-header centered ok-title="Entendi" no-close-on-backdrop>
-        <div id="modalText">
-          <h5>A tela de reservas ainda está em construção...</h5>
-          <h6 red>A única funcionalidade é ver os cadastros que constam no banco.</h6>
-        </div>
-      </b-modal>
       <b-modal ref="calendar" hide-header hide-footer centered no-close-on-backdrop>
         <b-form-group id="calendarGroup"
         :label="`${selected.split(' - ')[0] } escolha a data que deseja reservar: `" class="mt-3">
-          <b-input type="date" class="mt-4" size="sm"></b-input>
+        <b-alert></b-alert>
+          <b-input type="date" class="mt-4" size="sm" v-model="date"></b-input>
           <b-button variant="success" class="mt-5 mr-2">Reservar</b-button>
           <b-button variant="info" class="mt-5" @click="exitCalendar">Cancelar</b-button>
         </b-form-group>
@@ -36,7 +31,8 @@ name: 'reserveComp',
       modal: {
         message: '',
         status: false,
-      }
+      },
+      date: ''
     }
   },
   created() {
@@ -56,23 +52,35 @@ name: 'reserveComp',
         } 
       })
     },
-    showModal() {
-        this.$refs.alert.show()
-    },
     exitCalendar() {
       this.$refs.calendar.hide()
       this.selected = 'null'
+      this.date = ''
     }
   },
   watch: {
     'selected': function() {
       if(this.selected !== 'null')
       this.$refs.calendar.show()
+    },
+    'date': function() {
+      let date = this.date.split('-')
+      date[2] ++
+      let dateForm = date.join('-')
+      let dataa = new Date(dateForm)
+
+      let hoje = new Date()
+
+      if(dataa.getDate() < hoje.getDate()) {
+        alert('a data de reserva não pode ser maior que a atual.')
+        console.log('Menor')
+      } else {
+        console.log('maior')
+      }
+      // console.log(dataa.getFullYear())
+      // console.log(dataa.toLocaleDateString('pt-BR'))
     }
   }
-  // mounted() {
-  //   this.showModal()
-  // }
 }
 </script>
 

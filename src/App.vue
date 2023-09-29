@@ -6,9 +6,10 @@
     </div>
     <router-view></router-view>
     <router-view name="novoMenu"></router-view>
-    <!-- teste com vuex -->
-    <!-- <h1 class="mb-5">App.vue</h1>
-    <p v-for="(prod, id) in produtos" :key="id">{{ prod.description }} <a @click="teste">X</a></p> -->
+
+    <!-- <hr>
+    <Filho /> -->
+
     <Footer class="mt-5"/>
 
   </div>
@@ -18,8 +19,10 @@
 import Menu from './components/mainMenu.vue'
 import Footer from './components/Footer.vue'
 
+import Filho from './components/EstudoVuex/Filho.vue'
+
 export default {
-  components: { Menu, Footer },
+  components: { Menu, Footer, Filho },
   computed: {
     produtos() {
       return this.$store.state.produtos

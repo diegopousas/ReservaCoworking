@@ -5,33 +5,13 @@ import Users from "./components/List.vue";
 import Register from "./components/Register.vue";
 import RegisterList from "./components/RegisterList.vue";
 import Reserves from "./components/Reserve.vue";
-import StudyArea from "./components/StudyArea.vue"
-
-import TesteQuery from "./components/Teste.vue";
-import ResTeste from "./components/RespostaTask.vue";
+import CheckIn from './components/CheckIn.vue'
 
 Vue.use(Router);
 
 const router = new Router({
   mode: "history",
   routes: [
-    {
-      name: "Study",
-      path: '/study',
-      component: StudyArea
-    },
-    {
-      name: "Teste",
-      path: "/testeQuery",
-      component: TesteQuery,
-      // apagar !!!!!!!!!!!!!
-    },
-    {
-      name: "respTeste",
-      path: "/resTeste",
-      component: ResTeste,
-      // apagar !!!!!!!!!!!!!
-    },
     {
       name: "home",
       path: "/",
@@ -59,6 +39,11 @@ const router = new Router({
       path: "/reserves",
       component: Reserves,
     },
+    {
+      name: 'checkIn',
+      path: '/checkIn',
+      component: CheckIn,
+    }
   ],
 });
 

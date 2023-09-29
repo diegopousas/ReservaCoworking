@@ -5,11 +5,19 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        produtos: []
+        collaborators: []
     },
     getters: {
-        tamanho(state) {
-            return state.produtos.length
+        size(state) {
+            return state.collaborators.length
+        },
+        name(state) {
+            return state.collaborators
+        } 
+    },
+    mutations: {
+        add(state, info) {
+            state.collaborators.push(info)
         }
     }
 })

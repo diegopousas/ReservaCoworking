@@ -5,12 +5,12 @@
         <a>Inicio</a>
       </router-link>
 
-      <router-link to="/register" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Cadastro">
-        <a>Cadastro</a>
+      <router-link to="/reserves" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Agendamento">
+        <a>Agendamento</a>
       </router-link>
 
-      <router-link to="/reserves" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Reserva">
-        <a>Reserva</a>
+      <router-link to="/checkIn" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Check-In">
+        <a>Check-In</a>
       </router-link>
 
     </ul>

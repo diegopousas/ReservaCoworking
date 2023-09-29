@@ -1,17 +1,12 @@
 <template>
   <div id="body">
-    <button @click="areaEstudos">Desenvolvido por Diego Vieira Pousas em 2023 ©</button>
+    <p>Desenvolvido por Diego Vieira Pousas em 2023 ©</p>
   </div>
 </template>
 
 <script>
 export default {
   name: 'FooterComp',
-  methods: {
-    areaEstudos() {
-      this.$router.push('/study')
-    }
-  }
 }
 </script>
 
@@ -21,8 +16,7 @@ export default {
     font-size: 12px;
 }
 
-button {
-  border: none;
+p {
   background-color: white;
 }
 </style>

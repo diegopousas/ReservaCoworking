@@ -18,13 +18,16 @@
       </b-form-group>
       <b-button @click="save" variant="primary">Save</b-button>
       <b-button @click="show" class="ml-1">Mostrar</b-button>
-      <hr class="mt-5">
+
+      <Filho />
+
     </div>
 
   </div>
 </template>
 
 <script>
+import Filho from './Filho.vue'
 export default {
   data() {
     return {
@@ -32,6 +35,7 @@ export default {
       value: ''
     }
   },
+  components: { Filho },
   methods: {
 
     clear() {
