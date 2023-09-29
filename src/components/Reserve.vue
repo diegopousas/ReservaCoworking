@@ -11,10 +11,10 @@
       <b-modal ref="calendar" hide-header hide-footer centered no-close-on-backdrop>
         <b-form-group id="calendarGroup"
         :label="`${selected.split(' - ')[0] } escolha a data que deseja reservar: `" class="mt-3">
-        <b-alert></b-alert>
-          <b-input type="date" class="mt-4" size="sm" v-model="date"></b-input>
-          <b-button variant="success" class="mt-5 mr-2">Reservar</b-button>
-          <b-button variant="info" class="mt-5" @click="exitCalendar">Cancelar</b-button>
+          <b-alert :show="alertAtts.state" :variant="alertAtts.variant" :dismissible="alertAtts.dimissible">{{ alertAtts.text }}</b-alert>
+          <b-input type="date" class="mt-4" size="lg" v-model="date" :min="today"></b-input>
+          <b-button variant="success" class="mt-4 mr-2" size="lg">Reservar</b-button>
+          <b-button variant="info" class="mt-4" size="lg" @click="exitCalendar">Cancelar</b-button>
         </b-form-group>
       </b-modal>
     </b-form-group>
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
 name: 'reserveComp',
   data() {
@@ -32,15 +33,29 @@ name: 'reserveComp',
         message: '',
         status: false,
       },
-      date: ''
+      alertAtts: {
+        variant: '',
+        text: '',
+        state: false,
+        dimissible: false
+      },
+      date: '',
     }
   },
   created() {
-    this.dbConnection()  
+    this.dbConnection()
   },
   computed: {
     collaboratorsList() {
       return Object.values(this.collaborators)
+    },
+    today() {
+      let date = new Date()
+      let y = date.getFullYear()
+      let m = String(date.getMonth() +1 ).padStart(2, '0')
+      let d = String(date.getDate()).padStart(2, '0')
+      let formatedDate = `${y}-${m}-${d}`
+      return formatedDate
     }
   },
   methods: {
@@ -56,38 +71,35 @@ name: 'reserveComp',
       this.$refs.calendar.hide()
       this.selected = 'null'
       this.date = ''
-    }
+    },
+    alert(variant, text, state, dimissible) {
+      this.alertAtts.variant = variant
+      this.alertAtts.text = text
+      this.alertAtts.state = state
+      this.alertAtts.dimissible = dimissible
+    },
+    // dateFormat() {
+    //   let date = new Date()
+    //   let y = date.getFullYear()
+    //   let m = String(date.getMonth() +1 ).padStart(2, '0')
+    //   let d = String(date.getDate()).padStart(2, '0')
+    //   let formatedDate = `${y}-${m}-${d}`
+    //   return formatedDate
+    // }
   },
   watch: {
     'selected': function() {
       if(this.selected !== 'null')
       this.$refs.calendar.show()
-    },
-    'date': function() {
-      let date = this.date.split('-')
-      date[2] ++
-      let dateForm = date.join('-')
-      let dataa = new Date(dateForm)
-
-      let hoje = new Date()
-
-      if(dataa.getDate() < hoje.getDate()) {
-        alert('a data de reserva não pode ser maior que a atual.')
-        console.log('Menor')
-      } else {
-        console.log('maior')
-      }
-      // console.log(dataa.getFullYear())
-      // console.log(dataa.toLocaleDateString('pt-BR'))
     }
-  }
+  },
 }
 </script>
 
 <style scoped>
 
 #calendarGroup {
-  height: 150px;
+  height: 170px;
   text-align: center;
 }
 
@@ -112,6 +124,7 @@ h4 {
 
 #modalText {
   text-align: center;
+
 }
 
 [red] {

@@ -1,11 +1,11 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Home from "./components/Home.vue";
-import Users from "./components/List.vue";
 import Register from "./components/Register.vue";
 import RegisterList from "./components/RegisterList.vue";
 import Reserves from "./components/Reserve.vue";
 import CheckIn from './components/CheckIn.vue'
+import Schedulling from './components/Schedulling.vue'
 
 Vue.use(Router);
 
@@ -16,11 +16,6 @@ const router = new Router({
       name: "home",
       path: "/",
       component: Home,
-    },
-    {
-      name: "users",
-      path: "/users",
-      component: Users
     },
     {
       name: "register",
@@ -35,15 +30,20 @@ const router = new Router({
       ],
     },
     {
-      name: "reserves",
-      path: "/reserves",
-      component: Reserves,
+      name: "schedulling",
+      path: "/schedulling",
+      component: Schedulling,
     },
     {
       name: 'checkIn',
       path: '/checkIn',
       component: CheckIn,
-    }
+    },
+    {
+      name: 'oldSchedulling',
+      path: '/oldSchedulling',
+      component: Reserves,
+    },
   ],
 });
 

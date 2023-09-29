@@ -19,10 +19,8 @@
 import Menu from './components/mainMenu.vue'
 import Footer from './components/Footer.vue'
 
-import Filho from './components/EstudoVuex/Filho.vue'
-
 export default {
-  components: { Menu, Footer, Filho },
+  components: { Menu, Footer },
   computed: {
     produtos() {
       return this.$store.state.produtos
