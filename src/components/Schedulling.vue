@@ -15,39 +15,53 @@
           centralized
           class="mt-3">
           <b-input-group prepend="CPF" size="sm">
-            <b-form-input placeholder="Informe seu CPF para reservar esta mesa" type="password" v-model.number="inputedCPF" :disabled="!tableData.avaiable"></b-form-input>
+            <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="password" v-model.number="inputedCPF" :disabled="!tableData.avaiable"></b-form-input>
             <b-input-group-append>
               <b-button variant="info">Reservar</b-button>
             </b-input-group-append>
           </b-input-group>
         </b-form-group>
       </div>
+      <p id="messageRegister" centralized>Se ainda não é cadastrado, <a>clique aqui.</a></p>
     </b-modal>
-    <b-button @click="formatter(inputedDate)">Botão de Testes</b-button>
-    <b-row class="mt-5">
-      <b-col md="9">
-        <b-form-group label="Selecione a data da Reserva" id="dateGroup">
-          <b-input type="date" v-model="inputedDate"></b-input>
-        </b-form-group>
-      </b-col>
-      <b-col md="3">
-        <b-button id="buttonSearch" @click="createSeasons">Reservar</b-button>
-      </b-col>
-    </b-row>
+    <b-container id="tableDateReserve" centralized class="mt-5">
+      <b-form-group label="Informe a data da Reserva" id="dateGroup">
+        <b-input type="date" v-model="inputedDate" :min="todayFormatString"></b-input>
+      </b-form-group>
+    </b-container>
     <div id="groupSeasons">
-      <b-card id="seasons" v-for="(season, i) in tabless" :key="i">
-        <b-row>
-          <b-col md="1">
-            <b-button id="status" :variant="buttonStatus(season.person)" @click="abrirModal(season.name, season.avaiable, season)"></b-button>
-          </b-col>
-          <b-col md="3">
-            {{ season.name }}
-          </b-col>
-          <b-col md="8">
-            {{ season }}
-          </b-col>
-        </b-row>
-      </b-card>
+      <b-row>
+        <b-col md="6">
+          <b-card id="seasons" v-for="(season, i) in tabless" :key="i" v-show="i < 5">
+            <b-row>
+              <b-col md="1">
+                <b-button id="status" :variant="buttonStatus(season.person)" @click="abrirModal(season.name, season.avaiable, season)"></b-button>
+              </b-col>
+              <b-col md="6">
+                {{ season.name }}
+              </b-col>
+              <b-col md="5">
+                {{ season.person ? 'Indisponível' : 'Disponível' }}
+              </b-col>
+            </b-row>
+          </b-card>
+        </b-col>
+        <b-col md="6">
+          <b-card id="seasons" v-for="(season, i) in tabless" :key="i" v-show="i > 4">
+            <b-row>
+              <b-col md="1">
+                <b-button id="status" :variant="buttonStatus(season.person)" @click="abrirModal(season.name, season.avaiable, season)"></b-button>
+              </b-col>
+              <b-col md="6">
+                {{ season.name }}
+              </b-col>
+              <b-col md="5">
+                {{ season.person ? 'Indisponível' : 'Disponível' }}
+              </b-col>
+            </b-row>
+          </b-card>
+        </b-col>
+      </b-row>
     </div>
 </div>
 </template>
@@ -79,7 +93,13 @@ export default {
     };
   },
   computed: {
-
+    todayFormatString() {
+      const date = new Date()
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const d = String(date.getDate()).padStart(2, '0')
+      return `${y}-${m}-${d}`
+    }  
   },
   created() {
     this.dbConnectCollaborators()
@@ -148,7 +168,7 @@ export default {
       const data = Object.values(this.reserves)
       const c = data.findIndex((p) => p.data === this.inputedDate)
       const selected = Object.values(data)[c]
-      selected ? this.tabless = (Object.values(selected)[1]) : this.tabless = ''
+      selected ? this.tabless = (Object.values(selected)[1]) : this.createSeasons()
     },
     'inputedCPF': function() {
       if(typeof(this.inputedCPF) === 'string') {
@@ -189,6 +209,10 @@ export default {
   margin-top: 30px;
 }
 
+#messageRegister {
+  font-size: 10px;
+}
+
 #modalReserve {
   height: 100%;
 }
@@ -198,7 +222,7 @@ export default {
 }
 
 #seasons {
-  width: 80%;
+  width: 100%;
   height: 70px;
   margin-right: 10px;
   margin: auto;
@@ -220,6 +244,10 @@ export default {
   height: 100%;
   width: 68px;
 }
+
+#tableDateReserve {
+  width: 70%;
+} 
 
 #workSeasonName {
   /* border: 1px solid black; */
