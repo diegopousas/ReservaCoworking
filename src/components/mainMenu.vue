@@ -12,10 +12,6 @@
       <router-link to="/checkIn" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Check-In">
         <a>Check-In</a>
       </router-link>
-
-      <router-link to="/oldSchedulling" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Antigo Agendamento">
-        <a>Antigo Agendamento</a>
-      </router-link>
     </ul>
   </div>
 </template>

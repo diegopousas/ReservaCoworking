@@ -3,9 +3,10 @@ import Router from "vue-router";
 import Home from "./components/Home.vue";
 import Register from "./components/Register.vue";
 import RegisterList from "./components/RegisterList.vue";
-import Reserves from "./components/Reserve.vue";
 import CheckIn from './components/CheckIn.vue'
 import Schedulling from './components/Schedulling.vue'
+
+import StudyArea from "./components/Vuex/StudyArea.vue";
 
 Vue.use(Router);
 
@@ -40,10 +41,10 @@ const router = new Router({
       component: CheckIn,
     },
     {
-      name: 'oldSchedulling',
-      path: '/oldSchedulling',
-      component: Reserves,
-    },
+      name: 'studyArea',
+      path: '/studyArea',
+      component: StudyArea
+    }
   ],
 });
 

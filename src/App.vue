@@ -6,12 +6,7 @@
     </div>
     <router-view></router-view>
     <router-view name="novoMenu"></router-view>
-
-    <!-- <hr>
-    <Filho /> -->
-
     <Footer class="mt-5"/>
-
   </div>
 </template>
 
