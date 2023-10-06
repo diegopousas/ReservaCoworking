@@ -8,16 +8,18 @@
       <div id="modalReserve" centralized>
         <b-card :title="tableData.name">
           <b-card-text>Data: {{ formatter(inputedDate) }}</b-card-text>
-          <b-card-text>Status: {{ tableData.avaiable == true ? 'Disponível' : 'Indisponível' }}</b-card-text>
+          <b-card-text bold>Status: {{ tableData.avaiable == true ? 'Disponível' : 'Indisponível' }}</b-card-text>
         </b-card>
         <b-alert :variant="this.messageAlert.variant" :show="this.messageAlert.status" class="mt-2">{{ this.messageAlert.text }}</b-alert>
+        <!-- <b-form-input centralized type="text" v-model="inputedName" size="sm" class="mt-3" v-if="!reserveModalStyle.status" :placeholder="reserveModalStyle.message.placeName">{{ reserveModalStyle.message.name }}</b-form-input> -->
         <b-form-group
-          centralized
-          class="mt-3">
-          <b-input-group prepend="CPF" size="sm">
-            <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="password" v-model="inputedCPF" :disabled="!tableData.avaiable"></b-form-input>
-            <b-input-group-append>
-              <b-button :variant="reserveModalStyle.variant" @click="isRegistred(inputedCPF)">Reservar</b-button>
+        description="Digite somente os números do seu CPF"
+        centralized
+        class="mt-1">
+        <b-input-group prepend="CPF" size="sm" class="mt-1">
+          <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="text" v-model="inputedCPF" :disabled="!tableData.avaiable" maxlength="11"></b-form-input>
+          <b-input-group-append>
+              <b-button :variant="reserveModalStyle.variant" :disabled="reserveModalStyle.status">{{ reserveModalStyle.value }}</b-button>
             </b-input-group-append>
           </b-input-group>
           <p class="message" v-if="reserveModalStyle.status">{{ reserveModalStyle.message.text }}</p>
@@ -75,6 +77,7 @@ export default {
       collaborators: [],
       selectedStatus: '',
       inputedDate: '',
+      inputedName: '',
       inputedCPF: '',
       reserves: [],
       search: [],
@@ -91,10 +94,14 @@ export default {
         status: false
       },
       reserveModalStyle: {
+        status: true,
         variant: 'info',
+        value: 'Reservar',
         message: {
           status: false,
-          text: ''
+          text: '',
+          placeName: 'Seu nome aparecerá aqui...',
+          name: ''
         }
       }
     };
@@ -121,14 +128,25 @@ export default {
       return new Date(date).toLocaleDateString('pt-BR')
     },
 
-    isRegistred(personDocument) {
-      const ind = (Object.values(this.collaborators)).findIndex((p) => p.cpf === personDocument)
-      if(ind == '-1') {
-        console.log(false)
-        return false
-      } else {
-        console.log(true)
+    isRegistred() {
+      let test = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+      if(test != '-1') {
+        let name = Object.values(this.collaborators)[test].name
+        this.messageAlert.status = true
+        this.messageAlert.variant = 'success'
+        this.messageAlert.text = `${name}, confira seu CPF e conclua a reserva.`
+        this.reserveModalStyle.message.name = name
+        this.reserveModalStyle.status = false
         return true
+      } else {
+        this.reserveModalStyle.status = true
+        this.messageAlert.status = true
+        this.messageAlert.variant = 'warning'
+        this.messageAlert.text = 'O CPF digitado ainda não tem cadastro na nossa base, clique no botão cadastrar finalizar o cadastro.'
+        this.reserveModalStyle.value = 'Cadastrar'
+        this.reserveModalStyle.variant = 'success'
+        this.reserveModalStyle.status = false
+        return false
       }
     },
 
@@ -189,13 +207,14 @@ export default {
       selected ? this.tabless = (Object.values(selected)[1]) : this.createSeasons()
     },
     'inputedCPF': function() {
-      if(typeof(this.inputedCPF) === 'string') {
-        this.messageAlert.text = 'O campo CPF deve conter apenas numeros.'
-        this.messageAlert.variant = 'warning'
-        this.messageAlert.status = true
-      } else {
+      if(this.inputedCPF.length === 0) {
+        this.reserveModalStyle.variant = 'info'
+        this.reserveModalStyle.value = 'Reservar'
         this.messageAlert.status = false
-      }
+        this.reserveModalStyle.status = true
+      } else if(this.inputedCPF.length === 11) {
+        this.isRegistred()
+      } 
     }
   }
 };
@@ -205,6 +224,10 @@ export default {
 
 #buttonSearch {
   margin-top: 28px;
+}
+
+[bold] {
+  font-weight: bold;
 }
 
 [centralized] {
