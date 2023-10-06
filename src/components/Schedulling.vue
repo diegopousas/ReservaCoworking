@@ -15,14 +15,14 @@
           centralized
           class="mt-3">
           <b-input-group prepend="CPF" size="sm">
-            <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="password" v-model.number="inputedCPF" :disabled="!tableData.avaiable"></b-form-input>
+            <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="password" v-model="inputedCPF" :disabled="!tableData.avaiable"></b-form-input>
             <b-input-group-append>
-              <b-button variant="info">Reservar</b-button>
+              <b-button :variant="reserveModalStyle.variant" @click="isRegistred(inputedCPF)">Reservar</b-button>
             </b-input-group-append>
           </b-input-group>
+          <p class="message" v-if="reserveModalStyle.status">{{ reserveModalStyle.message.text }}</p>
         </b-form-group>
       </div>
-      <p id="messageRegister" centralized>Se ainda não é cadastrado, <a>clique aqui.</a></p>
     </b-modal>
     <b-container id="tableDateReserve" centralized class="mt-5">
       <b-form-group label="Informe a data da Reserva" id="dateGroup">
@@ -35,12 +35,12 @@
           <b-card id="seasons" v-for="(season, i) in tabless" :key="i" v-show="i < 5">
             <b-row>
               <b-col md="1">
-                <b-button id="status" :variant="buttonStatus(season.person)" @click="abrirModal(season.name, season.avaiable, season)"></b-button>
+                <b-button id="status" :variant="buttonStatus(season.person)" @click="preReserve(season.name, season.avaiable, season)"></b-button>
               </b-col>
               <b-col md="6">
                 {{ season.name }}
               </b-col>
-              <b-col md="5">
+              <b-col md="4">
                 {{ season.person ? 'Indisponível' : 'Disponível' }}
               </b-col>
             </b-row>
@@ -50,7 +50,7 @@
           <b-card id="seasons" v-for="(season, i) in tabless" :key="i" v-show="i > 4">
             <b-row>
               <b-col md="1">
-                <b-button id="status" :variant="buttonStatus(season.person)" @click="abrirModal(season.name, season.avaiable, season)"></b-button>
+                <b-button id="status" :variant="buttonStatus(season.person)" @click="preReserve(season.name, season.avaiable, season)"></b-button>
               </b-col>
               <b-col md="6">
                 {{ season.name }}
@@ -89,6 +89,13 @@ export default {
         text: '',
         variant: 'success',
         status: false
+      },
+      reserveModalStyle: {
+        variant: 'info',
+        message: {
+          status: false,
+          text: ''
+        }
       }
     };
   },
@@ -99,7 +106,7 @@ export default {
       const m = String(date.getMonth() + 1).padStart(2, '0')
       const d = String(date.getDate()).padStart(2, '0')
       return `${y}-${m}-${d}`
-    }  
+    }
   },
   created() {
     this.dbConnectCollaborators()
@@ -112,6 +119,17 @@ export default {
       parseInt(date[2]) + 1
       date.join('-')
       return new Date(date).toLocaleDateString('pt-BR')
+    },
+
+    isRegistred(personDocument) {
+      const ind = (Object.values(this.collaborators)).findIndex((p) => p.cpf === personDocument)
+      if(ind == '-1') {
+        console.log(false)
+        return false
+      } else {
+        console.log(true)
+        return true
+      }
     },
 
     async dbConnectCollaborators() {
@@ -151,7 +169,7 @@ export default {
       }
     },
     
-    abrirModal(name, status, date) {
+    preReserve(name, status, date) {
       this.$refs.modalReserve.show()
       this.tableData.name = name
       this.tableData.avaiable = status
@@ -209,7 +227,7 @@ export default {
   margin-top: 30px;
 }
 
-#messageRegister {
+#message {
   font-size: 10px;
 }
 
@@ -222,11 +240,12 @@ export default {
 }
 
 #seasons {
-  width: 100%;
+  width: 90%;
   height: 70px;
   margin-right: 10px;
   margin: auto;
   margin-top: 5px;
+  box-shadow: 2px 2px 2px rgb(179, 179, 179);
 }
 
 
