@@ -6,18 +6,18 @@
       centered
       @hide="closedModal">
       <div id="modalReserve" centralized>
-        <b-card :title="modalData.title">
+        <b-card :title="modalDate.title">
           <b-card-text>Data: {{ formatter(inputedDate) }}</b-card-text>
-          <b-card-text bold>{{ modalData.avaiable == true ? 'Disponível' : 'Indisponível' }}</b-card-text>
+          <b-card-text bold>{{ modalDate.avaiable == true ? 'Disponível' : 'Indisponível' }}</b-card-text>
         </b-card>
-        <b-alert :variant="this.messageAlert.variant" :show="this.messageAlert.status" class="mt-2">{{ this.messageAlert.text }}</b-alert>
+        <b-alert :variant="this.alertModal.variant" :show="this.alertModal.status" class="mt-2">{{ this.alertModal.text }}</b-alert>
         <b-form-input id="inpName" centralized type="text" v-model="inputedName" size="sm" class="mt-3" v-if="reserveModalStyle.inputStatus" :placeholder="reserveModalStyle.message.placeName">{{ reserveModalStyle.message.name }}</b-form-input>
         <b-form-group
         description="Digite somente os números do seu CPF"
         centralized
         class="mt-1">
         <b-input-group prepend="CPF" size="sm" class="mt-1">
-          <b-form-input centralized placeholder="Informe seu CPF para reservar esta mesa" type="text" v-model="inputedCPF" :disabled="!modalData.avaiable" maxlength="11"></b-form-input>
+          <b-form-input centralized :placeholder="reserveModalStyle.placeholder" type="text" v-model="inputedCPF" :disabled="!modalDate.avaiable" maxlength="11"></b-form-input>
           <b-input-group-append>
               <b-button :variant="reserveModalStyle.variant" :disabled="registerButtonReserveStatus" @click="register(reserveModalStyle.value)">{{ reserveModalStyle.value }}</b-button>
             </b-input-group-append>
@@ -31,10 +31,11 @@
         <b-input type="date" v-model="inputedDate" :min="todayFormatString"></b-input>
       </b-form-group>
     </b-container>
+    <b-alert :show="alertReserve.status" class="mt-2">{{ alertReserve.message }}</b-alert>
     <div id="groupSeasons">
       <b-row>
         <b-col md="6">
-          <b-card id="seasons" v-for="(season, i) in tables" :key="i" v-show="i < 5" @click="preReserve(season.tableName, season.avaiable, season)">
+          <b-card id="seasons" v-for="(season, i) in tables" :key="i" v-show="i < 5" @click="preReserve(season.tableName, season.avaiable, season, i)">
             <b-row>
               <b-col md="1">
                 <b-button id="status" :variant="buttonStatus(season.person)"></b-button>
@@ -49,7 +50,7 @@
           </b-card>
         </b-col>
         <b-col md="6">
-          <b-card id="seasons" v-for="(season, i) in tables" :key="i" v-show="i > 4" @click="preReserve(season.tableName, season.avaiable, season)">
+          <b-card id="seasons" v-for="(season, i) in tables" :key="i" v-show="i > 4" @click="preReserve(season.tableName, season.avaiable, season, i)">
             <b-row>
               <b-col md="1">
                 <b-button id="status" :variant="buttonStatus(season.person)"></b-button>
@@ -83,12 +84,16 @@ export default {
       search: [],
       tables: [],
       buttonColor: 'success',
-      modalData: {
+      modalDate: {
         title: '',
         avaiable: '',
         date: ''
       },
-      messageAlert: {
+      alertReserve: {
+        status: false,
+        message: ''
+      },
+      alertModal: {
         status: false,
         text: '',
         variant: 'success'
@@ -98,6 +103,7 @@ export default {
         status: true,
         variant: 'info',
         value: 'Reservar',
+        placeholder: 'Informe seu CPF para reservar esta mesa.',
         message: {
           status: false,
           text: '',
@@ -138,19 +144,24 @@ export default {
 
     register(value) {
       if(value === 'Reservar') {
-        const indData = Object.values(this.reserves).findIndex((p) => p.data === this.inputedDate)
-        const indPerson = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
-        const indTable = Object.values(this.reserves)[indData].tables.findIndex((p) => p.name === this.modalData.title)
-        this.$http.update(Object.values(this.reserves)[indData].tables[indTable].person, Object.values(this.collaborators)[indPerson].name)
-        console.log(Object.values(this.reserves)[indData].tables[indTable].person)
+        this.dbConnectReserves()
+        setTimeout(() => {
+          const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
+          const id = Object.keys(this.reserves)[indDate]
+          const idTable = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.tableName === this.modalDate.title)
+          const idPerson = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+          const collaboratorName = Object.values(this.collaborators)[idPerson].name
+          this.$http.patch(`/reserves/${id}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName})
+        }, 5000);
+        console.log('5 segundos')
       } else if(value === 'Cadastrar') {
         this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName})
           .then(() => {
             this.dbConnectCollaborators()
             this.reserveModalStyle.inputStatus = false
-            this.messageAlert.text = `${this.inputedName}, seu cadastro foi concluido com sucesso. Para concluir sua reserva, clique em reservar.`
-            this.messageAlert.status = true
-            this.modalData.avaiable = false
+            this.alertModal.text = `${this.inputedName}, seu cadastro foi concluido com sucesso. Para realizar sua reserva, clique em reservar.`
+            this.alertModal.status = true
+            this.modalDate.avaiable = false
             this.reserveModalStyle.variant = 'info'
             this.reserveModalStyle.value = 'Reservar'
           })        
@@ -161,9 +172,9 @@ export default {
       let test = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
       if(test != '-1') {
         let name = Object.values(this.collaborators)[test].name
-        this.messageAlert.status = true
-        this.messageAlert.variant = 'success'
-        this.messageAlert.text = `${name}, confira seu CPF e conclua a reserva.`
+        this.alertModal.status = true
+        this.alertModal.variant = 'success'
+        this.alertModal.text = `${name}, confira seu CPF e conclua a reserva.`
         this.reserveModalStyle.value = 'Reservar'
         this.reserveModalStyle.message.name = name
         this.reserveModalStyle.variant = 'info'
@@ -172,9 +183,9 @@ export default {
         return true
       } else {
         this.inputedName = ''
-        this.messageAlert.status = true
-        this.messageAlert.variant = 'warning'
-        this.messageAlert.text = 'O CPF digitado ainda não tem cadastro na nossa base. Certifique que o mesmo esteja correto, informe seu nome no campo indicado e clique em cadastrar.'
+        this.alertModal.status = true
+        this.alertModal.variant = 'warning'
+        this.alertModal.text = 'O CPF digitado ainda não tem cadastro na nossa base. Certifique que o mesmo esteja correto, informe seu nome no campo indicado e clique em cadastrar.'
         this.reserveModalStyle.value = 'Cadastrar'
         this.reserveModalStyle.variant = 'success'
         this.reserveModalStyle.status = false
@@ -196,18 +207,19 @@ export default {
 
     createSeasons() {
       const obj = Object.values(this.reserves)
-      const index = obj.findIndex((p) => p.data === this.inputedDate)
+      const index = obj.findIndex((p) => p.date === this.inputedDate)
       if(index === -1) {
-        this.workSeasons.data = this.inputedDate
+        this.workSeasons.date = this.inputedDate
         this.workSeasons.tables = []
         for(let i = 0; i < 10; i++) {
           this.workSeasons.tables.push({ tableName: `Mesa ${i+1}`, avaiable: true, person: ''})
         }
         this.$http.post('reserves.json', this.workSeasons)
-          this.dbConnectReserves()
-          this.tables = this.workSeasons.tables     
-      } else {
+        this.tables = this.workSeasons.tables
         this.dbConnectReserves()
+        } else {
+          const tables = Object.values(this.reserves)[index]
+          this.tables = tables.tables
       }
     }, 
     buttonStatus(person) {
@@ -220,35 +232,44 @@ export default {
     },
     
     preReserve(name, status, date) {
-      this.$refs.modalReserve.show()
-      this.modalData.title = name
-      this.modalData.avaiable = status
-      this.modalData.date = date
+      this.modalDate.title = name
+      this.modalDate.avaiable = status
+      this.modalDate.date = date
+      if(this.modalDate.avaiable) {
+        this.$refs.modalReserve.show()
+      } else {
+        setTimeout(() => {
+          this.alertReserve.status = false
+        }, 6000);
+        this.alertReserve.status = true
+        this.alertReserve.message = 'A mesa seleciona já encontra-se reservada, selecione outra.'
+      }
     },
 
     closedModal() {
       this.inputedCPF = ''
       this.inputedName = ''
       this.reserveModalStyle.inputStatus = false
-      this.messageAlert.status = false
-    }
+      this.alertModal.status = false
+    },
   },
   watch: {
     'inputedDate': function() {
-      const data = Object.values(this.reserves)
-      const indDate = data.findIndex((p) => p.data === this.inputedDate)
-      const selected = Object.values(data)[indDate]
+      const date = Object.values(this.reserves)
+      const indDate = date.findIndex((p) => p.date === this.inputedDate)
+      const selected = Object.values(date)[indDate]
       if(selected) {
+        this.dbConnectReserves()
         this.tables = (Object.values(selected)[1])
       } else {
-        this.createSeasons()                
+        this.createSeasons()
       }
     },
     'inputedCPF': function() {
       if(this.inputedCPF.length === 0) {
         this.reserveModalStyle.variant = 'info'
         this.reserveModalStyle.value = 'Reservar'
-        this.messageAlert.status = false
+        this.alertModal.status = false
         this.reserveModalStyle.status = true
       } else if(this.inputedCPF.length === 11) {
         this.isRegistred()
