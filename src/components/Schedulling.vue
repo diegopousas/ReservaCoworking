@@ -12,14 +12,14 @@
         </b-card>
         <b-alert :variant="this.alertModal.variant" :show="this.alertModal.status" class="mt-2">{{ this.alertModal.text }}</b-alert>
         <b-form-input id="inpName" centralized type="text" v-model="inputedName" size="sm" class="mt-3" v-if="reserveModalStyle.inputStatus" :placeholder="reserveModalStyle.message.placeName">{{ reserveModalStyle.message.name }}</b-form-input>
-        <b-form-group
+        <b-form-group smallest
         description="Digite somente os números do seu CPF"
         centralized
         class="mt-1">
         <b-input-group prepend="CPF" size="sm" class="mt-1">
           <b-form-input centralized :placeholder="reserveModalStyle.placeholder" type="text" v-model="inputedCPF" :disabled="!modalDate.avaiable" maxlength="11"></b-form-input>
           <b-input-group-append>
-              <b-button :variant="reserveModalStyle.variant" :disabled="registerButtonReserveStatus" @click="register(reserveModalStyle.value)">{{ reserveModalStyle.value }}</b-button>
+              <b-button :variant="reserveModalStyle.variant" :disabled="registerButtonReserveStatus " @click="register(reserveModalStyle.value)">{{ reserveModalStyle.value }}</b-button>
             </b-input-group-append>
           </b-input-group>
           <p class="message" v-if="reserveModalStyle.status">{{ reserveModalStyle.message.text }}</p>
@@ -28,7 +28,7 @@
     </b-modal>
     <b-container id="tableDateReserve" centralized class="mt-5">
       <b-form-group label="Informe a data da Reserva" id="dateGroup">
-        <b-input type="date" v-model="inputedDate" :min="todayFormatString"></b-input>
+        <b-input type="date" v-model="inputedDate" :min="todayFormatString" centralized size="sm"></b-input>
       </b-form-group>
     </b-container>
     <b-alert :show="alertReserve.status" class="mt-2">{{ alertReserve.message }}</b-alert>
@@ -141,82 +141,100 @@ export default {
       date.join('-')
       return new Date(date).toLocaleDateString('pt-BR')
     },
-
-    register(value) {
+    async register(value) {
       if(value === 'Reservar') {
         this.dbConnectReserves()
-        setTimeout(() => {
+        await this.$http('reserves.json')
           const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
           const id = Object.keys(this.reserves)[indDate]
           const idTable = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.tableName === this.modalDate.title)
           const idPerson = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
           const collaboratorName = Object.values(this.collaborators)[idPerson].name
-          this.$http.patch(`/reserves/${id}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName})
-        }, 5000);
-        console.log('5 segundos')
+          const collaboratorDocument = Object.values(this.collaborators)[idPerson].cpf
+          await this.$http.patch(`/reserves/${id}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName, document: collaboratorDocument})
+          this.modalDate.avaiable = false
+          const res = await this.$http('reserves.json')
+          this.tables = []
+          this.tables = Object.values(res.data)[indDate].tables
+          this.$refs.modalReserve.hide()
+          this.alertReserve.status = true
+          this.alertReserve.message = 'Reserva realizada com sucesso. Não esqueça de realizar o check-in no dia da reserva.'
       } else if(value === 'Cadastrar') {
-        this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName})
-          .then(() => {
-            this.dbConnectCollaborators()
-            this.reserveModalStyle.inputStatus = false
-            this.alertModal.text = `${this.inputedName}, seu cadastro foi concluido com sucesso. Para realizar sua reserva, clique em reservar.`
-            this.alertModal.status = true
-            this.modalDate.avaiable = false
-            this.reserveModalStyle.variant = 'info'
-            this.reserveModalStyle.value = 'Reservar'
-          })        
+        await this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName})
+          this.dbConnectCollaborators()
+          this.reserveModalStyle.inputStatus = false
+          this.alertModal.text = `${this.inputedName}, seu cadastro foi concluido com sucesso. Para realizar sua reserva, clique em reservar.`
+          this.alertModal.status = true
+          this.modalDate.avaiable = false
+          this.reserveModalStyle.variant = 'info'
+          this.reserveModalStyle.value = 'Reservar'
       }
     },
-
-    isRegistred() {
-      let test = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
-      if(test != '-1') {
-        let name = Object.values(this.collaborators)[test].name
-        this.alertModal.status = true
-        this.alertModal.variant = 'success'
-        this.alertModal.text = `${name}, confira seu CPF e conclua a reserva.`
-        this.reserveModalStyle.value = 'Reservar'
-        this.reserveModalStyle.message.name = name
-        this.reserveModalStyle.variant = 'info'
-        this.reserveModalStyle.status = false
-        this.inputedName = name
-        return true
-      } else {
-        this.inputedName = ''
+    async isRegistredOrReserved() {
+      await this.dbConnectReserves()
+      const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
+      const tableInd = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.document === this.inputedCPF)
+      if(tableInd !== -1) {
+        const tableName = Object.values(this.reserves)[indDate].tables[tableInd].tableName
         this.alertModal.status = true
         this.alertModal.variant = 'warning'
-        this.alertModal.text = 'O CPF digitado ainda não tem cadastro na nossa base. Certifique que o mesmo esteja correto, informe seu nome no campo indicado e clique em cadastrar.'
-        this.reserveModalStyle.value = 'Cadastrar'
-        this.reserveModalStyle.variant = 'success'
-        this.reserveModalStyle.status = false
-        this.reserveModalStyle.inputStatus = true
-        return false
+        this.alertModal.text = `Para o CPF digitado já consta uma reserva neste dia para a ${tableName}.`
+        return
+      }
+      if(this.collaborators === null) {
+          this.alertModal.status = true
+          this.alertModal.variant = 'warning'
+          this.alertModal.text = 'O CPF digitado ainda não tem cadastro na nossa base. Certifique que o mesmo esteja correto, informe seu nome no campo indicado e clique em cadastrar.'
+          this.reserveModalStyle.value = 'Cadastrar'
+          this.reserveModalStyle.variant = 'success'
+          this.reserveModalStyle.status = false
+          this.reserveModalStyle.inputStatus = true      } else {
+        const test = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+        if(test != '-1') {
+          const name = Object.values(this.collaborators)[test].name
+          this.alertModal.status = true
+          this.alertModal.variant = 'success'
+          this.alertModal.text = `${name}, confira seu CPF e conclua a reserva.`
+          this.reserveModalStyle.value = 'Reservar'
+          this.reserveModalStyle.message.name = name
+          this.reserveModalStyle.variant = 'info'
+          this.reserveModalStyle.status = false
+          this.inputedName = name
+          return true
+        } else {
+          this.inputedName = ''
+          this.alertModal.status = true
+          this.alertModal.variant = 'warning'
+          this.alertModal.text = 'O CPF digitado ainda não tem cadastro na nossa base. Certifique que o mesmo esteja correto, informe seu nome no campo indicado e clique em cadastrar.'
+          this.reserveModalStyle.value = 'Cadastrar'
+          this.reserveModalStyle.variant = 'success'
+          this.reserveModalStyle.status = false
+          this.reserveModalStyle.inputStatus = true
+          return false
+        }
       }
     },
-
     async dbConnectCollaborators() {
       const res = await this.$http('collaborators.json')
         this.collaborators = res.data
     },
-    dbConnectReserves() {
-      this.$http('reserves.json')
-        .then((res) => {
+    async dbConnectReserves() {
+      const res = await this.$http('reserves.json')
           res.data === null ? [] : this.reserves = res.data
-        })
     },
 
-    createSeasons() {
+    async createSeasons() {
       const obj = Object.values(this.reserves)
       const index = obj.findIndex((p) => p.date === this.inputedDate)
       if(index === -1) {
         this.workSeasons.date = this.inputedDate
         this.workSeasons.tables = []
         for(let i = 0; i < 10; i++) {
-          this.workSeasons.tables.push({ tableName: `Mesa ${i+1}`, avaiable: true, person: ''})
+          await this.workSeasons.tables.push({ tableName: `Mesa ${i+1}`, avaiable: true, person: '', document: ''})
         }
-        this.$http.post('reserves.json', this.workSeasons)
-        this.tables = this.workSeasons.tables
-        this.dbConnectReserves()
+          await this.$http.post('reserves.json', this.workSeasons)
+          this.tables = this.workSeasons.tables
+          this.dbConnectReserves()
         } else {
           const tables = Object.values(this.reserves)[index]
           this.tables = tables.tables
@@ -232,6 +250,7 @@ export default {
     },
     
     preReserve(name, status, date) {
+      this.alertReserve.status = false
       this.modalDate.title = name
       this.modalDate.avaiable = status
       this.modalDate.date = date
@@ -252,6 +271,14 @@ export default {
       this.reserveModalStyle.inputStatus = false
       this.alertModal.status = false
     },
+
+    selectedDate() {
+      const date = Object.values(this.reserves)
+      const indDate = date.findIndex((p) => p.date === this.inputedDate)
+      const selected = Object.values(date)[indDate]
+      return selected
+    }
+
   },
   watch: {
     'inputedDate': function() {
@@ -266,13 +293,14 @@ export default {
       }
     },
     'inputedCPF': function() {
-      if(this.inputedCPF.length === 0) {
+      if(this.inputedCPF.length < 11) {
         this.reserveModalStyle.variant = 'info'
         this.reserveModalStyle.value = 'Reservar'
         this.alertModal.status = false
         this.reserveModalStyle.status = true
+        this.reserveModalStyle.inputStatus = false
       } else if(this.inputedCPF.length === 11) {
-        this.isRegistred()
+        this.isRegistredOrReserved()
       } 
     }
   }
@@ -291,11 +319,6 @@ export default {
 
 [centralized] {
   text-align: center;
-}
-
-#contentBox {
-  width: 90%;
-  background-color: gray;
 }
 
 #dateGroup {
@@ -335,6 +358,9 @@ export default {
   font-size: 15px;
 }
 
+[smallest] {
+  font-size: 12px;
+}
 
 #status {
   width: 25px;

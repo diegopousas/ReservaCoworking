@@ -1,15 +1,15 @@
 <template>
   <div>
     <ul>
-      <router-link to="/" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Inicio">
+      <router-link to="/" class="mr-5" tag="li" active-class="active" exact>
         <a>Inicio</a>
       </router-link>
 
-      <router-link to="/schedulling" class="mr-5" tag="li" active-class="active" exact v-b-tooltip.bottom title="Agendamento">
+      <router-link to="/schedulling" class="mr-5" tag="li" active-class="active" exact>
         <a>Agendamento</a>
       </router-link>
 
-      <router-link to="/checkIn" tag="li" class="mr-5" active-class="active" v-b-tooltip.bottom title="Check-In">
+      <router-link to="/checkIn" tag="li" class="mr-5" active-class="active">
         <a>Check-In</a>
       </router-link>
     </ul>
