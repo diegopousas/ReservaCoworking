@@ -16,6 +16,18 @@ export default {
 </script>
 
 <style scoped>
+
+@media(max-width: 990px) {
+  #welcomeText {
+    text-align: center;
+    margin-top: 30px;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  #map {
+      margin-top: 50px
+  }
+}
 #welcomeText {
   text-align: center;
   margin-top: 30px;
@@ -25,5 +37,4 @@ export default {
 #map {
     margin-top: 50px
 }
-
 </style>

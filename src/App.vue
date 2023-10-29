@@ -33,7 +33,7 @@ export default {
 #app {
   margin: auto;
   width: 80%;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif, 'Montserrat';
 }
 
 #title {

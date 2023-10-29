@@ -118,7 +118,7 @@ export default {
       const date = new Date()
       const y = date.getFullYear()
       const m = String(date.getMonth() + 1).padStart(2, '0')
-      const d = String(date.getDate()).padStart(2, '0')
+      const d = String(date.getDate() - 7).padStart(2, '0') // prazo de 7 dias
       return `${y}-${m}-${d}`
     },
     registerButtonReserveStatus() {
