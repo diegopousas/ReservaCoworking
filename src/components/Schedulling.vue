@@ -99,6 +99,7 @@ export default {
         variant: 'success'
       },
       reserveModalStyle: {
+        validator: false,
         inputStatus: false,
         status: true,
         variant: 'info',
@@ -116,9 +117,10 @@ export default {
   computed: {
     todayFormatString() {
       const date = new Date()
+      date.setDate(date.getDate() - 7)
       const y = date.getFullYear()
       const m = String(date.getMonth() + 1).padStart(2, '0')
-      const d = String(date.getDate() - 7).padStart(2, '0') // prazo de 7 dias
+      const d = String(date.getDate()).padStart(2, '0') // prazo de 7 dias
       return `${y}-${m}-${d}`
     },
     registerButtonReserveStatus() {
@@ -145,6 +147,7 @@ export default {
       if(value === 'Reservar') {
         this.dbConnectReserves()
         await this.$http('reserves.json')
+          this.createSeasons()
           const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
           const id = Object.keys(this.reserves)[indDate]
           const idTable = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.tableName === this.modalDate.title)
@@ -188,7 +191,8 @@ export default {
           this.reserveModalStyle.value = 'Cadastrar'
           this.reserveModalStyle.variant = 'success'
           this.reserveModalStyle.status = false
-          this.reserveModalStyle.inputStatus = true      } else {
+          this.reserveModalStyle.inputStatus = true      
+        } else {
         const test = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
         if(test != '-1') {
           const name = Object.values(this.collaborators)[test].name
@@ -229,8 +233,9 @@ export default {
       if(index === -1) {
         this.workSeasons.date = this.inputedDate
         this.workSeasons.tables = []
+        this.workSeasons.meetingRoom = { name: 'Sala de Reunião', status: false }
         for(let i = 0; i < 10; i++) {
-          await this.workSeasons.tables.push({ tableName: `Mesa ${i+1}`, avaiable: true, person: '', document: ''})
+          await this.workSeasons.tables.push({ tableName: `Mesa ${i+1}`, avaiable: true, person: '', document: '', checkIn: false})
         }
           await this.$http.post('reserves.json', this.workSeasons)
           this.tables = this.workSeasons.tables
@@ -238,6 +243,7 @@ export default {
         } else {
           const tables = Object.values(this.reserves)[index]
           this.tables = tables.tables
+          this.reserveModalStyle.validator = true
       }
     }, 
     buttonStatus(person) {
@@ -282,12 +288,14 @@ export default {
   },
   watch: {
     'inputedDate': function() {
+      this.reserveModalStyle.validator = false
       const date = Object.values(this.reserves)
       const indDate = date.findIndex((p) => p.date === this.inputedDate)
       const selected = Object.values(date)[indDate]
+      this.tables = []
       if(selected) {
         this.dbConnectReserves()
-        this.tables = (Object.values(selected)[1])
+        this.tables = (Object.values(selected)[2])
       } else {
         this.createSeasons()
       }

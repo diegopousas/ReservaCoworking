@@ -5,8 +5,7 @@ import Register from "./components/Register.vue";
 import RegisterList from "./components/RegisterList.vue";
 import CheckIn from './components/CheckIn.vue'
 import Schedulling from './components/Schedulling.vue'
-
-import StudyArea from "./components/Vuex/StudyArea.vue";
+import MyReserves from './components/MyReserves.vue'
 
 Vue.use(Router);
 
@@ -41,9 +40,9 @@ const router = new Router({
       component: CheckIn,
     },
     {
-      name: 'studyArea',
-      path: '/studyArea',
-      component: StudyArea
+      name: 'myReserves',
+      path: '/myReserves',
+      component: MyReserves
     }
   ],
 });

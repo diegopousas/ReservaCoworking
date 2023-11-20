@@ -12,6 +12,9 @@
       <router-link to="/checkIn" tag="li" class="mr-5" active-class="active">
         <a>Check-In</a>
       </router-link>
+      <router-link to="/MyReserves" tag="li" class="mr-5" active-class="active">
+        <a>Minhas Reservas</a>
+      </router-link>
     </ul>
   </div>
 </template>
@@ -23,8 +26,14 @@ export default {
 </script>
 
 <style scoped>
+@media(max-width: 990px) {
+  ul {
+    width: 100%;
+    margin: auto;
+  }
+}
 ul {
-  width: 60%;
+  width: 100%;
   margin: auto;
 }
 
