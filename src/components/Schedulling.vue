@@ -169,7 +169,7 @@ export default {
           if(Object.values(this.collaborators)[idCollaborator].reserves === undefined) {
             await this.$http.patch(`/collaborators/${idCol}/.json`, { reserves: [{ date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente' }] })
           } else {
-            console.log('mais uma reserva adicionada')
+            console.log('mais uma reserva adicionada') 
             await this.$http.post(`collaborators/${idCol}/reserves.json`, [{ date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente' }])
           }
           this.alertReserve.message = 'Reserva realizada com sucesso. Não esqueça de realizar o check-in no dia da reserva.'
