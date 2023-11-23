@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="body">
     <b-collapse id="collapse" v-model="showReserves">
       <div id="alertBox">
         <b-alert :show="alert.status" class="m-0" :id="alert.animation" :variant="alert.variant">{{ alert.message }}</b-alert>
@@ -9,7 +9,7 @@
           label="Insira seu CPF para gerenciar suas reservas "
           centralized>
           <b-input :id="noReserves" size="sm" inputs v-model="inputedCPF" centralized maxlength="11"></b-input>
-          <b-button class="mt-2" variant="info" @click="listReserves" :disabled="!inputs.document.status">Buscar Reservas</b-button>
+          <b-button class="mt-2" variant="info" @click="listReserves">Buscar Reservas</b-button>
         </b-form-group>
       </b-container>
     </b-collapse>
@@ -39,7 +39,7 @@
           </b-col>
           <b-col completeFill class="mr-1">
             <span>
-              <b-button buttonCard :disabled="reserve.table.checkIn" v-b-tooltip.hover title="Depois de realizado check in, a reserva não pode ser cancelada." @click="cancelReserve">Cancelar</b-button>
+              <b-button buttonCard :disabled="reserve.table.checkIn" v-b-tooltip.hover title="Depois de realizado check in, a reserva não pode ser cancelada." @click="cancelReserve(reserve)">Cancelar</b-button>
             </span>
           </b-col>
         </b-row>
@@ -97,6 +97,8 @@ export default {
         const indTable = res.tables.findIndex((t) => t.document === this.inputedCPF)
         if(indTable !== -1 && this.inputedCPF.length === 11) {
           this.reservesCollaborator.push({date: res.date, table: res.tables[indTable]})
+          this.collaboratorData.document = this.inputedCPF
+          this.collaboratorData.name = res.tables[indTable].person
         }
         this.showReserves = false
         this.collaboratorData.status = !this.collaboratorData.status
@@ -106,26 +108,39 @@ export default {
     isRegistered() {
       const registerTest = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
       const reserves = Object.values(this.reserves)
-      reserves.forEach((p) => {
-        const indTable = p.tables.findIndex((t) => t.document === this.inputedCPF)
-        if(indTable === -1) {
-          console.log('quebrou')
-          return
+      if(registerTest !== -1) {
+        const positions = []
+        for(let i = 0; i < reserves.length; i++) {
+          const test = Object.values(this.reserves)[i].tables.findIndex((t) => t.document === this.inputedCPF)
+          positions.push(test)
         }
-      })
-      if(registerTest === -1) {
-        this.noReserves = 'shakeX'
-        this.alert.status = true
-        this.alert.animation = 'fadeIn'
-        this.alert.message = 'Para o CPF digitado não constam reservas.'
-        this.alert.variant = 'warning'
-        this.inputs.document.status = false
-        return
+        let hasReserve = positions.filter(table => table > -1)
+        if(hasReserve.length === 0) {
+          this.noReserves = 'shakeX'
+          this.alert.status = true
+          this.alert.animation = 'fadeIn'
+          this.alert.message = 'Para o CPF digitado não constam reservas.'
+          this.alert.variant = 'warning'
+          this.inputs.document.status = false
+        }
+      } else {
+          this.noReserves = 'shakeX'
+          this.alert.status = true
+          this.alert.animation = 'fadeIn'
+          this.alert.message = 'O CPF informado não tem um cadastro em nossa base.'
+          this.alert.variant = 'warning'
+          this.inputs.document.status = false
       }
     },
 
-    cancelReserve() {
-      console.log('cancelado')
+    async cancelReserve(a) {
+      const indDate = Object.values(this.reserves).findIndex((r) => r.date === a.date)
+      const id = Object.keys(this.reserves)[indDate]
+      const indTable = Object.values(this.reserves)[indDate].tables.findIndex((t) => t.document === this.inputedCPF)
+      await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { avaiable: true, person: '', document: '', checkIn: false})
+      console.log('deletado')
+      this.dbConnectReserves()
+      console.log(this.reserves)
     },
 
     clearSearch() {
@@ -156,71 +171,22 @@ export default {
 
   watch: {
     'inputedCPF': function () {
+      this.alert.status = false
+      this.alert.animation = 'fadeOut'
       if(this.inputedCPF.length === 11) {
         this.isRegistered()
       }
-
-
-
-
-      // const reserves = Object.values(this.reserves)
-      // reserves.forEach((p) => {
-      //   const indTable = p.tables.findIndex((t) => t.document === this.inputedCPF)
-      //   if(indTable === -1) {
-      //       this.noReserves = 'shakeX'
-      //       this.alert.status = true
-      //       this.alert.animation = 'fadeIn'
-      //       this.alert.message = 'Para o CPF digitado não constam reservas.'
-      //       this.alert.variant = 'warning'
-      //       this.inputs.document.status = false
-      //       return
-      //     } else {
-      //       this.alert.status = false
-      //       this.alert.animation = 'fadeOut'
-      //       this.noReserves = ''
-      //     }
-      // })
-      // if(this.inputedCPF.length === 11 && indCollaborator === -1) {
-      //   this.noReserves = 'shakeX'
-      //     this.alert.status = true
-      //     this.alert.animation = 'fadeIn'
-      //     this.alert.message = 'Para o CPF digitado não constam reservas.'
-      //     this.alert.variant = 'warning'
-      //     this.inputs.document.status = false
-      //     return
-      // }
-      //   this.collaboratorData.name = Object.values(this.collaborators)[indCollaborator].name
-      //   this.collaboratorData.document = Object.values(this.collaborators)[indCollaborator].cpf
-      //   this.inputs.document.status = true
-      //   const a = Object.values(this.reserves)
-      //   a.forEach((p) => {
-      //     const indTable = p.tables.findIndex((t) => t.document === this.inputedCPF)
-      //     if(indTable === -1) {
-      //       this.noReserves = 'shakeX'
-      //       this.alert.status = true
-      //       this.alert.animation = 'fadeIn'
-      //       this.alert.message = 'Para o CPF digitado não constam reservas.'
-      //       this.alert.variant = 'warning'
-      //       this.inputs.document.status = false
-      //       return
-      //     } else {
-      //       this.alert.status = false
-      //       this.alert.animation = 'fadeOut'
-      //       this.noReserves = ''
-      //     }
-      //   })
-      // } else if(this.inputedCPF.length === 0) {
-      //   this.alert.status = false
-      //   this.alert.animation = 'fadeOut'
-      //   this.noReserves = ''
-      // }
     }
   }
-
 }
 </script>
 
 <style>
+
+#body {
+  animation: fadeIn;
+  animation-duration: 1s;
+}
 
 [buttonCard] {
   background-color: transparent;

@@ -3,8 +3,7 @@
     <b-modal ref="reserveDataModal"
       hide-header
       hide-footer
-      centered
-      @hide="teste">
+      centered>
       <b-card id="cardBody" no-body>
         <b-row>
           <b-col md="9">
@@ -39,16 +38,16 @@
         <b-input type="text" size="sm" v-model="inputedCPF" maxlength="11" centralized id="inpCPF" :disabled="datesReserves.length > 0"></b-input>
         <b-alert id="alert" :variant="alert.variant" :show="alert.status" class="mt-3">{{ alert.message }}</b-alert>
         <b-button class="mt-3 mr-1" @click="searchReserves" variant="info" :disabled="inputedCPF.length < 11" v-show="datesReserves.length === 0">Buscar Reservas</b-button>
+        <b-button @click="deleteReserves" class="mt-3" :disabled="!this.reserves">Esvaziar Banco</b-button>
         <b-button class="mt-3" variant="warning" v-show="datesReserves.length > 0" @click="datesReserves = [], inputedCPF = ''">Nova Busca</b-button>
       </b-form-group>
     </b-container>
     <b-form-group>
-      <b-card id="table" v-for="(reserve, i) in datesReserves" :key="i" class="mt-1 overflow-hidden" @click="reserveData(reserve)">
-        <b-row alignOnCenter>
-          <b-col md="1">
-            <div id="checked"></div>
+      <b-card id="table" v-for="reserve in datesReserves" :key="reserve.date" class="mt-1 overflow-hidden" @click="reserveData(reserve)" no-body>
+        <b-row id="rowData">
+          <b-col md="1" :id="actualStatus(reserve)">
           </b-col>
-          <b-col md="9" class="text-center">
+          <b-col md="7" class="text-center">
             {{ reserve.date | date }}
           </b-col>
         </b-row>
@@ -86,17 +85,20 @@ export default {
 
   methods: {
 
-    async teste() {
-      console.log('chamou')
-      for(let i = 0; i < this.datesReserves; i++) {
-        console.log(this.datesReserves[i])
+    actualStatus(a) {
+      const table = Object.values(a)[2].findIndex((p) => p.document === this.inputedCPF)
+      const status = Object.values(a)[2][table].checkIn
+      if(status === true) {
+        return 'checked'
+      } else {
+        return 'unChecked'
       }
     },
 
-    // async deleteReserves() {
-    //   const res = await this.$http.delete('reserves.json')
-    //     console.log('deletados')
-    // },
+    async deleteReserves() {
+      await this.$http.delete('reserves.json')
+      console.log('deletados')
+    },
 
     async dbConnectReserves() {
       const res = await this.$http('reserves.json')
@@ -109,18 +111,23 @@ export default {
       const idRes = Object.values(this.reserves)[indDate]
       this.selectedDate = Object.values(this.reserves)[indDate]
       const indTable = Object.values(this.selectedDate)[2].findIndex((p) => p.document === this.inputedCPF)
-      const checking = await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { checkIn: true })
-      // this.checkInStatus(this.selectedDate.date, idRes)
-      this.datesReserves = checking
+      await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { checkIn: true })
+      this.reserveInformations.default
+      await this.dbConnectReserves()
+      this.checkInStatus(this.selectedDate.date, idRes)
+      this.reserveData(this.reserves)
+      this.searchReserves()
       this.$refs.reserveDataModal.hide()
     },
 
     reserveData(data) {
-      const indTable = Object.values(data)[2].findIndex((p) => p.document === this.inputedCPF)
-      this.$refs.reserveDataModal.show()
-      this.reserveInformations.date = data.date
-      this.reserveInformations.tableName = Object.values(data)[2][indTable].tableName
-      this.checkInStatus(data.date, data)
+      if(data.date !== undefined) {
+        this.$refs.reserveDataModal.show()
+        const indTable = Object.values(data)[2].findIndex((p) => p.document === this.inputedCPF)
+        this.reserveInformations.date = data.date
+        this.reserveInformations.tableName = Object.values(data)[2][indTable].tableName
+        this.checkInStatus(data.date, data)
+      }
     },
 
     checkInStatus(date, data) {
@@ -182,14 +189,6 @@ export default {
     this.dbConnectReserves()
     this.reserves = []
   },
-
-  computed: {
-    actualStatus() {
-      const a = this.$http('reserves')
-      console.log(a.data)
-      return a.data
-    }
-  },
   
   watch: {
     'inputedCPF': function() {
@@ -204,8 +203,28 @@ export default {
 <style scoped>
 
 #checked {
-  background-color: blue;
+  animation: fadeIn;
+  animation-duration: 1s;
+  background-color: green;
   height: 100%;
+}
+
+#unChecked {
+  background-color: red;
+  height: 100%;
+}
+
+#completeFill {
+  width: 100%;
+  margin: auto;
+}
+
+#rowData {
+  height: 100%;
+}
+
+#tableData {
+  height: 50px;
 }
 
 @media(max-width: 990px) {
@@ -274,6 +293,7 @@ export default {
 }
 
 [centralized] {
+  margin: auto;
   text-align: center;
 }
 
@@ -297,8 +317,10 @@ export default {
 } */
 
 #table {
+  animation: fadeIn;
+  animation-duration: 1s;
   width: 600px;
-  height: 100px;
+  height: 50px;
   border-radius: 5px;
   margin: auto;
   cursor: pointer;
@@ -310,12 +332,9 @@ export default {
   font: 'Montserrat';
 }
 
-/* [modalBody] {
-  font-size: 15px;
-  color: gray;
-  text-align: center;
-  width: 700px;
-  height: 500px;
-} */
+#app {
+  animation: fadeIn;
+  animation-duration: 1s;
+}
 
 </style>

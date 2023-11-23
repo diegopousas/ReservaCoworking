@@ -29,6 +29,8 @@ export default {
   }
 }
 #welcomeText {
+  animation: fadeIn;
+  animation-duration: 1s;
   text-align: center;
   margin-top: 30px;
   font-family: "Poppins", sans-serif;

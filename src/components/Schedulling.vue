@@ -74,6 +74,7 @@ export default {
   name: "SchedulingComp",
   data() {
     return {
+      bookingHistory: [],
       workSeasons: {},
       collaborators: [],
       selectedStatus: '',
@@ -149,20 +150,30 @@ export default {
         await this.$http('reserves.json')
           this.createSeasons()
           const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
-          const id = Object.keys(this.reserves)[indDate]
+          const idRes = Object.keys(this.reserves)[indDate]
           const idTable = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.tableName === this.modalDate.title)
           const idPerson = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
           const collaboratorName = Object.values(this.collaborators)[idPerson].name
           const collaboratorDocument = Object.values(this.collaborators)[idPerson].cpf
-          await this.$http.patch(`/reserves/${id}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName, document: collaboratorDocument})
+          await this.$http.patch(`/reserves/${idRes}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName, document: collaboratorDocument})
           this.modalDate.avaiable = false
           const res = await this.$http('reserves.json')
           this.tables = []
           this.tables = Object.values(res.data)[indDate].tables
           this.$refs.modalReserve.hide()
           this.alertReserve.status = true
+          //criando historico de reservas
+          const idCollaborator = Object.values(this.collaborators).findIndex((p) => p.cpf === collaboratorDocument)
+          const idCol = Object.keys(this.collaborators)[idCollaborator] 
+          this.dbConnectCollaborators()
+          if(Object.values(this.collaborators)[idCollaborator].reserves === undefined) {
+            await this.$http.patch(`/collaborators/${idCol}/.json`, { reserves: [{ date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente' }] })
+          } else {
+            console.log('mais uma reserva adicionada')
+            await this.$http.post(`collaborators/${idCol}/reserves.json`, [{ date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente' }])
+          }
           this.alertReserve.message = 'Reserva realizada com sucesso. Não esqueça de realizar o check-in no dia da reserva.'
-      } else if(value === 'Cadastrar') {
+      } else if(value === 'Cadastrar') {''
         await this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName})
           this.dbConnectCollaborators()
           this.reserveModalStyle.inputStatus = false
@@ -335,6 +346,8 @@ export default {
 }
 
 #groupSeasons {
+  animation: fadeIn;
+  animation-duration: 1s;
   width: 100%;
   margin: auto;
   margin-top: 30px;
@@ -353,6 +366,8 @@ export default {
 }
 
 #seasons {
+  animation: fadeIn;
+  animation-duration: 1s;
   width: 90%;
   height: 70px;
   margin-right: 10px;
@@ -393,6 +408,11 @@ export default {
   /* border: 1px solid black; */
   height: 100%;
   font-size: 19px;
+}
+
+#app {
+  animation: fadeIn;
+  animation-duration: 1s;
 }
 
 
