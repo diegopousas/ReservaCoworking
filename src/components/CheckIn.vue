@@ -26,7 +26,7 @@
           </b-col>
           <b-col md="3" class="p-1">
             <b-button class="buttonCheck" variant="success" :disabled="reserveInformations.statusCheckIn === 'Realizado'" @click="checkIn()">
-              <b-icon icon="check-lg" />
+            
             </b-button>
           </b-col>
         </b-row>
@@ -210,7 +210,7 @@ export default {
 }
 
 #unChecked {
-  background-color: red;
+  background-color: #ffc107;
   height: 100%;
 }
 
@@ -229,7 +229,7 @@ export default {
 
 @media(max-width: 990px) {
   #table {
-    width: 600px;
+    width: 300px;
     border-radius: 5px;
     height: 100px;
     margin: auto;

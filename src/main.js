@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
+import { BootstrapVue } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import './plugins/axios'
@@ -10,7 +10,6 @@ import 'animate.css';
 
 Vue.config.productionTip = false
 Vue.use(BootstrapVue);
-Vue.use(BootstrapVueIcons)
 
 Vue.filter('cpf', value => {
   return `${value[0]}${value[1]}${value[2]}.***.***-**`
