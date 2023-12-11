@@ -27,19 +27,22 @@
       <b-card centralized id="tableData" class="mt-2 p-0" v-for="reserve in reservesCollaborator" :key="reserve.date">
         <b-row>
           <b-col md="1" class="p-0 m-0">
-            <div :id="statusCheckIn(reserve.table.checkIn)"></div>
+            <div :id="statusCheckIn(reserve)"></div>
+            <!-- <div :id="statusCheckIn(reserve.table.checkIn)"></div> -->
           </b-col>
           <b-col md="3" completeFill>
             {{ reserve.date | date }}
           </b-col>
           <b-col md="2" completeFill>
             {{ reserve.table.tableName }}
+            <!-- {{ reserve.table.tableName }} -->
           </b-col>
           <b-col md="3" completeFill>
-            {{ checkInMessage(reserve.table.checkIn) }}
+            {{ reserve.checkInStatus }}
           </b-col>
           <b-col completeFill class="mr-1">
-            <b-button buttonCard :disabled="reserve.table.checkIn" @click="cancelReserve(reserve)">Cancelar</b-button>
+            <b-button buttonCard :disabled="reserve.checkIn" @click="cancelReserve(reserve)">Cancelar</b-button>
+            <!-- <b-button buttonCard :disabled="reserve.table.checkIn" @click="cancelReserve(reserve)">Cancelar</b-button> -->
           </b-col>
         </b-row>
       </b-card>
@@ -102,37 +105,27 @@ export default {
     },
 
     async listReserves() {
-      // Listando pela colection collaborators
-      // const indCol = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
-      // const tables = Object.values(this.collaborators)[indCol].reserves
-      // const arrTables = Object.values(tables)
-      // arrTables.forEach((p) => {
-      //   this.reservesCollaborator.push({date: p.date, table: p.table})
-      // })
-      // Object.values(this.collaborators).forEach((res) => {
-      //   if(res.reserves !== undefined) {
-      //     const a = res.reserves
-      //     console.log(a)
-      //     // a.forEach(())
-      //   }
-      // })
-
-
-      Object.values(this.reserves).forEach((res) => {
-        const indTable = res.tables.findIndex((t) => t.document === this.inputedCPF)
-        if(indTable !== -1 && this.inputedCPF.length === 11) {
-          this.reservesCollaborator.push({date: res.date, table: res.tables[indTable]})
-          this.collaboratorData.document = this.inputedCPF
-          this.collaboratorData.name = res.tables[indTable].person
-        }
-        this.showReserves = false
-        this.collaboratorData.status = !this.collaboratorData.status
-      })
+      const collaboratorId = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+      const hasReserve = Object.values(this.collaborators)[collaboratorId].reserves !== undefined
+      if(hasReserve) {
+        const reserves = Object.values(this.collaborators)[collaboratorId].reserves
+        Object.values(reserves).forEach((res) => {
+          this.reservesCollaborator.push({ date: res.date, status: res.active, checkInStatus: this.checkInMessage(res.checkInStatus, res.checkInDate), table: res.table })
+        })
+      } else {
+          this.noReserves = 'shakeX'
+          this.alert.status = true
+          this.alert.animation = 'fadeIn'
+          this.alert.message = 'Para o CPF digitado não constam reservas.'
+          this.alert.variant = 'warning'
+          this.inputs.document.status = true
+      }
     },
 
     isRegistered() {
       const registerTest = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
-      const reserves = Object.values(this.reserves)
+      const collaborator = Object.values(this.collaborators)[registerTest]
+      const reserves = Object.values(collaborator)[registerTest]
       if(registerTest !== -1) {
         this.inputs.document.status = false
         const positions = []
@@ -160,13 +153,22 @@ export default {
     },
 
     async cancelReserve(a) {
+      // cancelamento reserva
       const indDate = Object.values(this.reserves).findIndex((r) => r.date === a.date)
       const id = Object.keys(this.reserves)[indDate]
       const indTable = Object.values(this.reserves)[indDate].tables.findIndex((t) => t.document === this.inputedCPF)
       await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { avaiable: true, person: '', document: '', checkIn: ''})
-      
+      // cancelamento da reserva na consulta de colaborador
       await this.dbConnectReserves()
-      console.log(this.reserves)
+      // mudando o status da reserva no historico
+      const indKey = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+      const personKey = Object.keys(this.collaborators)[indKey]
+      const date = Object.values(this.reserves)[indDate].date
+      const reserves = Object.values(this.collaborators)[indKey].reserves
+      const indReserves = Object.values(reserves).findIndex((r) => r.date === date)
+      const idReserve = Object.keys(reserves)[indReserves]
+      await this.$http.patch(`collaborators/${personKey}/reserves/${idReserve}.json`, { active: false, table: a.table.tableName, dateDelete: this.formatDate(new Date().toLocaleDateString('pt-BR')), deleted: true })
+      // this.listReserves()
     },
 
     clearSearch() {
@@ -177,25 +179,26 @@ export default {
     },
 
     statusCheckIn(data) {
-      if(data === true) {
+      if(data.checkInStatus === 'Realizado') {
         return 'checked'
-      } else if(data === '') {
+      } else if(data.checkInStatus === '') {
         return 'deleted'
       } else {
         return 'pending'
       }
     },
 
-    checkInMessage(data) {
-      if(data === true) {
+    checkInMessage(status, date) {
+      if(status === true && date) {
         return 'Realizado'
-      } else if(data === false) {
-        return 'Pendente'
-      } else if(data === "") {
-        return 'Deletado'
       } else {
-        return 'Expirado'
+        return 'Pendente'
       }
+    },
+
+    formatDate(date) {
+      const a = date.split("/")
+      return `${a[2]}-${a[1]}-${a[0]}`
     }
   },
 

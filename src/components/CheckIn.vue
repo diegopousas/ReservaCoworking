@@ -23,10 +23,13 @@
                 Prazo Check In: <b>{{ reserveInformations.deadLine }}</b>
               </b-col>
             </b-row>
+            <b-row>
+              <b-col v-if="this.reserveInformations.checkInDate">Data Realização Check-In: <b>{{ reserveInformations.checkInDate | date }} </b></b-col>
+            </b-row>
           </b-col>
           <b-col md="3" class="p-1">
             <b-button class="buttonCheck" variant="success" :disabled="reserveInformations.statusCheckIn === 'Realizado'" @click="checkIn()">
-            
+              <b-icon icon="check-lg" />
             </b-button>
           </b-col>
         </b-row>
@@ -38,7 +41,7 @@
         <b-input type="text" size="sm" v-model="inputedCPF" maxlength="11" centralized id="inpCPF" :disabled="datesReserves.length > 0"></b-input>
         <b-alert id="alert" :variant="alert.variant" :show="alert.status" class="mt-3">{{ alert.message }}</b-alert>
         <b-button class="mt-3 mr-1" @click="searchReserves" variant="info" :disabled="inputedCPF.length < 11" v-show="datesReserves.length === 0">Buscar Reservas</b-button>
-        <b-button @click="deleteReserves" class="mt-3" :disabled="!this.reserves">Esvaziar Banco</b-button>
+        <!-- <b-button @click="deleteReserves" class="mt-3" :disabled="!this.reserves">Esvaziar Banco</b-button> -->
         <b-button class="mt-3" variant="warning" v-show="datesReserves.length > 0" @click="datesReserves = [], inputedCPF = ''">Nova Busca</b-button>
       </b-form-group>
     </b-container>
@@ -72,7 +75,8 @@ export default {
         date: '',
         tableName: '',
         statusCheckIn: '',
-        deadLine: ''
+        deadLine: '',
+        checkInDate: ''
       },
       selectedDate: '',
       alert: {
@@ -111,7 +115,7 @@ export default {
       const idRes = Object.values(this.reserves)[indDate]
       this.selectedDate = Object.values(this.reserves)[indDate]
       const indTable = Object.values(this.selectedDate)[2].findIndex((p) => p.document === this.inputedCPF)
-      await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { checkIn: true })
+      await this.$http.patch(`/reserves/${id}/tables/${indTable}/.json`, { checkIn: true, checkInDate: new Date().toLocaleDateString('pt-BR') })
       this.reserveInformations.default
       await this.dbConnectReserves()
       this.checkInStatus(this.selectedDate.date, idRes)
@@ -126,6 +130,7 @@ export default {
         const indTable = Object.values(data)[2].findIndex((p) => p.document === this.inputedCPF)
         this.reserveInformations.date = data.date
         this.reserveInformations.tableName = Object.values(data)[2][indTable].tableName
+        this.reserveInformations.checkInDate = Object.values(data)[2][indTable].checkInDate ? Object.values(data)[2][indTable].checkInDate : ''
         this.checkInStatus(data.date, data)
       }
     },

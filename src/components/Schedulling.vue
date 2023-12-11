@@ -152,30 +152,22 @@ export default {
           const indDate = Object.values(this.reserves).findIndex((p) => p.date === this.inputedDate)
           const idRes = Object.keys(this.reserves)[indDate]
           const idTable = Object.values(this.reserves)[indDate].tables.findIndex((p) => p.tableName === this.modalDate.title)
+          const tableName = Object.values(this.reserves)[indDate].tables[idTable].tableName
           const idPerson = Object.values(this.collaborators).findIndex((p) => p.cpf === this.inputedCPF)
+          const idPersonKey = Object.keys(this.collaborators)[idPerson]
           const collaboratorName = Object.values(this.collaborators)[idPerson].name
           const collaboratorDocument = Object.values(this.collaborators)[idPerson].cpf
           await this.$http.patch(`/reserves/${idRes}/tables/${idTable}/.json`, { avaiable: false, person: collaboratorName, document: collaboratorDocument})
-          await this.$http.post(`/reserves/${idRes}/tables/${idTable}/.json`, JSON.stringify([{ avaiable: false, person: collaboratorName, document: collaboratorDocument}]))
+          await this.$http.post(`/collaborators/${idPersonKey}/reserves.json`, { id: idRes, date: this.inputedDate, table: tableName, active: true, deleted: false, checked: false })
           this.modalDate.avaiable = false
           const res = await this.$http('reserves.json')
           this.tables = []
           this.tables = Object.values(res.data)[indDate].tables
           this.$refs.modalReserve.hide()
           this.alertReserve.status = true
-          //criando historico de reservas
-          const idCollaborator = Object.values(this.collaborators).findIndex((p) => p.cpf === collaboratorDocument)
-          const idCol = Object.keys(this.collaborators)[idCollaborator] 
-          await this.dbConnectCollaborators()
-          if(Object.values(this.collaborators)[idCollaborator].reserves === undefined) {
-            await this.$http.patch(`/collaborators/${idCol}/.json`, { reserves: [{ date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente' }] })
-          } else {
-            console.log('mais uma reserva adicionada') 
-            await this.$http.post(`collaborators/${idCol}/reserves.json`, {date: this.inputedDate, table: this.modalDate.title, status: 'Ativo', checkInStatus: 'Pendente'} )
-          }
           this.alertReserve.message = 'Reserva realizada com sucesso. Não esqueça de realizar o check-in no dia da reserva.'
       } else if(value === 'Cadastrar') {
-        await this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName, reserves: []})
+        await this.$http.post('collaborators.json', {cpf: this.inputedCPF, name: this.inputedName})
           this.dbConnectCollaborators()
           this.reserveModalStyle.inputStatus = false
           this.alertModal.text = `${this.inputedName}, seu cadastro foi concluido com sucesso. Para realizar sua reserva, clique em reservar.`
@@ -193,7 +185,7 @@ export default {
         const tableName = Object.values(this.reserves)[indDate].tables[tableInd].tableName
         this.alertModal.status = true
         this.alertModal.variant = 'warning'
-        this.alertModal.text = `Para o CPF digitado já consta uma reserva neste dia para a ${tableName}.`
+        this.alertModal.text = `O CPF digitado já realizou uma reserva neste dia para a ${tableName}.`
         return
       }
       if(this.collaborators === null) {
